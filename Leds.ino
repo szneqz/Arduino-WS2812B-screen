@@ -1,28 +1,30 @@
-    #include <Adafruit_NeoPixel.h>
+#include <Adafruit_NeoPixel.h>
      
     #define PIN 6
     #define DIODE_COUNT 234
     #define ROWS 13
     #define COLUMNS 18
+    #define MAX_OPTION 2
+    #define MIN_OPTION 0
 
     #define DEBOUNCE_TIME 50
 
     byte sprites[4][30] = {
       {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000011, 0b00000011, 0b00010010, 0b00010010, 0b01001000, 
-      0b01001000, 0b11000000, 0b11000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00010000, 0b00100011, 
-      0b01000000, 0b10001100, 0b00000000, 0b01111010, 0b00000001, 0b00110000, 0b00000011, 0b00000000, 0b00000000, 0b00000000},
+      0b01001000, 0b11000000, 0b11000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00010000, 0b00100000, 
+      0b01000000, 0b10000000, 0b00000000, 0b00000010, 0b00000001, 0b11110000, 0b00000011, 0b00000000, 0b00000000, 0b00000000},
       
       {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00011110, 0b00011110, 0b01001000, 
-      0b01001000, 0b11000000, 0b11000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00010000, 0b00100011, 
-      0b01000000, 0b10001100, 0b00000000, 0b01111010, 0b00000001, 0b00110000, 0b00000011, 0b00000000, 0b00000000, 0b00000000},
+      0b01001000, 0b11000000, 0b11000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00010000, 0b00100000, 
+      0b01000000, 0b10000000, 0b00000000, 0b00000010, 0b00000001, 0b11110000, 0b00000011, 0b00000000, 0b00000000, 0b00000000},
       
       {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00010010, 0b00010010, 0b01111000, 
-      0b01111000, 0b11000000, 0b11000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00010000, 0b00100011, 
-      0b01000000, 0b10001100, 0b00000000, 0b01111010, 0b00000001, 0b00110000, 0b00000011, 0b00000000, 0b00000000, 0b00000000},
+      0b01111000, 0b11000000, 0b11000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00010000, 0b00100000, 
+      0b01000000, 0b10000000, 0b00000000, 0b00000010, 0b00000001, 0b11110000, 0b00000011, 0b00000000, 0b00000000, 0b00000000},
       
       {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00010010, 0b00010010, 0b01001000, 
-      0b01001000, 0b11000000, 0b11000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00010000, 0b00100011, 
-      0b01000000, 0b10001100, 0b00000000, 0b01111010, 0b00000001, 0b00110000, 0b00000011, 0b00000000, 0b00000000, 0b00000000}
+      0b01001000, 0b11000000, 0b11000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00010000, 0b00100000, 
+      0b01000000, 0b10000000, 0b00000000, 0b00000010, 0b00000001, 0b11110000, 0b00000011, 0b00000000, 0b00000000, 0b00000000}
       };
 
       //dla spriteów
@@ -37,6 +39,17 @@
         int dest[2] = {0, 0};
         int colorNr = 1;
         int dir = 0;
+      //
+
+      //dla Sanke game
+        int snakeSgt[DIODE_COUNT][2];
+        int head = 0;
+        int tail_len = 3;
+        int snake_dir = 0;  //0 - right, 1 - down, 2 - left, 3 - up
+        int fruit_pos[2];
+        int snake_mode = 0; //-1 dead, 0 static, 1 playing
+        int snake_delay = 30; //30 okresow po 100 milisekund czyli 3 sekundy
+        bool snake_visible = true;
       //
 
       //dla ogolnego menu
@@ -88,6 +101,17 @@
         else
         pixels.setPixelColor(i, *(bgColor) * bgSat / 100, *(bgColor + 1) * bgSat / 100, *(bgColor + 2) * bgSat / 100);
       }
+    }
+
+    float fract(float x) { return x - int(x); }
+
+    float mix(float a, float b, float t) { return a + (b - a) * t; }
+
+    void hsv2rgb(float h, float s, float v, int* rgb) 
+    {
+      rgb[0] = v * mix(1.0, constrain(abs(fract(h + 1.0) * 6.0 - 3.0) - 1.0, 0.0, 1.0), s) * 255;
+      rgb[1] = v * mix(1.0, constrain(abs(fract(h + 0.6666666) * 6.0 - 3.0) - 1.0, 0.0, 1.0), s) * 255;
+      rgb[2] = v * mix(1.0, constrain(abs(fract(h + 0.3333333) * 6.0 - 3.0) - 1.0, 0.0, 1.0), s) * 255;
     }
 
     void blinkingEyes(int nrColor)
@@ -191,6 +215,178 @@
       colorSingleAdd(act[1] * COLUMNS + act[0], colors[colorNr], 100);
       delay(100);
     }
+
+    void spawn_fruit()
+    {
+      bool isGood = true;
+
+      do
+      {
+        isGood = true;
+          
+        fruit_pos[0] = random() % COLUMNS;
+        fruit_pos[1] = random() % ROWS;
+
+        for(int i = 0; i < tail_len; i++)
+        {
+          if(snakeSgt[i][0] == fruit_pos[0] && snakeSgt[i][1] == fruit_pos[1])
+          {
+            isGood = false;
+            break;
+          }
+        }
+      }while(isGood == false);
+    }
+
+    void reset_snake()
+    {
+        snakeSgt[0][0] = (int)(COLUMNS / 2);
+        snakeSgt[0][1] = (int)(ROWS / 2);
+        snakeSgt[1][0] = snakeSgt[0][0] - 1;
+        snakeSgt[1][1] = snakeSgt[0][1];
+        snakeSgt[2][0] = snakeSgt[1][0] - 1;
+        snakeSgt[2][1] = snakeSgt[0][1];
+        head = 0;
+        tail_len = 3;
+        snake_dir = 0;  //0 - right, 1 - down, 2 - left, 3 - up
+        colorSingle(fruit_pos[1] * COLUMNS + fruit_pos[0], colors[0], 100); //zamaluj poprzedniego
+        spawn_fruit();
+        snake_mode = 0; //set static
+        snake_delay = 30;
+        snake_visible = true;
+
+      for(int i = 0; i < tail_len; i++)
+      {
+        colorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[1], 100);
+      }
+      delay(100);
+    }
+
+    void snakeGame()
+    {
+      if(snake_mode == 1)
+      {
+        //zapamietaj poprzednia pozycje glowy
+        int prevHead[2];
+        prevHead[0] = snakeSgt[head][0];
+        prevHead[1] = snakeSgt[head][1];
+  
+        //glowa w miejscu ogona zawsze
+        head--;
+        if(head < 0)
+          head = tail_len - 1;
+  
+        //zapamietaj poprzednie ulozenie ogona
+        int prevTail[2];
+        prevTail[0] = snakeSgt[head][0];
+        prevTail[1] = snakeSgt[head][1];
+  
+        int movX = 0;
+        int movY = 0;
+        switch(snake_dir)
+        {
+          case 0: movX = 1; break;
+          case 1: movY = 1; break;
+          case 2: movX = -1; break;
+          case 3: movY = -1; break;
+          default: break;
+        }
+  
+        snakeSgt[head][0] = prevHead[0] + movX;
+        snakeSgt[head][1] = prevHead[1] + movY;
+  
+        if(snakeSgt[head][0] < 0)
+          snakeSgt[head][0] = COLUMNS - 1;
+        if(snakeSgt[head][0] >= COLUMNS)
+          snakeSgt[head][0] = 0;
+        if(snakeSgt[head][1] < 0)
+          snakeSgt[head][1] = ROWS - 1;
+        if(snakeSgt[head][1] >= ROWS)
+          snakeSgt[head][1] = 0;
+
+      if(snake_visible)
+      {
+        for(int i = 0; i < tail_len; i++)
+        { //maluj weza
+          int tmpColor[3];
+          hsv2rgb((float) i / tail_len, 1, 1, tmpColor);
+          colorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], tmpColor, 50);
+        }
+      }
+      else
+      {
+        for(int i = 0; i < tail_len; i++)
+        { //usuwaj weza
+          colorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[0], 100);
+        }
+      }
+
+      colorSingle(fruit_pos[1] * COLUMNS + fruit_pos[0], colors[7], 100);
+      
+        //zdobywanie punktu
+        if(snakeSgt[head][0] == fruit_pos[0] && snakeSgt[head][1] == fruit_pos[1])
+        {
+          tail_len++;
+          spawn_fruit();
+  
+          for(int i = tail_len; i > head; i--)
+          {
+            snakeSgt[i][0] = snakeSgt[i - 1][0];
+            snakeSgt[i][1] = snakeSgt[i - 1][1];
+          }
+          
+          snakeSgt[head][0] = prevTail[0];
+          snakeSgt[head][1] = prevTail[1];
+  
+          head++;
+        }
+  
+        //smierc przy zderzeniu z samym soba
+        for(int i = 0; i < tail_len; i++)
+        {
+          if(i == head)
+            continue;
+          if(snakeSgt[head][0] == snakeSgt[i][0] && snakeSgt[head][1] == snakeSgt[i][1])
+          {
+            snake_mode = -1;
+            break;
+          }
+        }
+      
+        delay(100);
+        colorSingle(prevTail[1] * COLUMNS + prevTail[0], colors[0], 100); //zamaluj za ogonem (oszczednosc obliczen :3)
+      }
+      else
+      {
+        if(snake_visible)
+        {
+          for(int i = 0; i < tail_len; i++)
+          { //maluj weza
+            int tmpColor[3];
+            hsv2rgb((float) i / tail_len, 1, 1, tmpColor);
+            colorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], tmpColor, 50);
+          }
+        }
+        else
+        {
+          for(int i = 0; i < tail_len; i++)
+          { //usuwaj weza
+            colorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[0], 100);
+          }
+        }
+        if(snake_mode == -1)
+        {
+          snake_visible = !snake_visible;
+          snake_delay--;
+          if(snake_delay <= 0)
+          {
+            reset_snake();
+          }
+        }
+          
+        delay(100);
+      }
+    }
      
     void setup()
     {
@@ -219,54 +415,103 @@
       delay(20);
       
     if(bitRead(flags, 0))
-    {
+    { //left
       if(!isMainOpt)
       {
         if(mainOption == 0)
-        {
+        { //twarz
         option--;
         if(option < 0)
           option = 4;
+        }
+        if(mainOption == 2)
+        { //snakeGame
+          if(snake_dir != 0 && snake_mode == 1)
+            snake_dir = 2;
+          if(snake_mode == 0)
+            snake_mode = 1;
         }
       }
       bitClear(flags, 0);
     }
     if(bitRead(flags, 1))
-    {
+    { //up
       if(isMainOpt)
+      {
         mainOption--;
+        if(mainOption < MIN_OPTION)
+          mainOption = MAX_OPTION;
+      }
+      else
+      {
+        if(mainOption == 2)
+        { //snakeGame
+          if(snake_dir != 1  && snake_mode == 1)
+            snake_dir = 3;
+          if(snake_mode == 0)
+            snake_mode = 1;
+        }
+      }
       bitClear(flags, 1);
     }
     if(bitRead(flags, 2))
-    {
+    { //right
       if(!isMainOpt)
       {
         if(mainOption == 0)
-        {
+        { //twarz
         option++;
         if(option > 4)
           option = 0;
+        }
+        if(mainOption == 2)
+        { //snakeGame
+          if(snake_dir != 2 && snake_mode == 1)
+            snake_dir = 0;
+          if(snake_mode == 0)
+            snake_mode = 1;
         }
       }
       bitClear(flags, 2);
     }
     if(bitRead(flags, 3))
-    {
+    { //down
       if(isMainOpt)
+      {
         mainOption++;
+        if(mainOption > MAX_OPTION)
+          mainOption = MIN_OPTION;
+      }
+      else
+      {
+        if(mainOption == 2)
+        { //snakeGame
+          if(snake_dir != 3 && snake_mode == 1)
+            snake_dir = 1;
+          if(snake_mode == 0)
+            snake_mode = 1;
+        }
+      }
       bitClear(flags, 3);
     }
     if(bitRead(flags, 4))
-    {
+    { //btn1 wlacza aplikacje
       if(isMainOpt)
+      {
         isMainOpt = false;
+        pixels.clear();
+        if(mainOption == 2)
+        {
+          reset_snake();
+        }
+      }
       bitClear(flags, 4);
     }
     if(bitRead(flags, 5))
-    {
+    { //btn2 wylacza aplikacje
       if(!isMainOpt)
       {
-        if(mainOption == 0 || mainOption == 1)
+        if(mainOption == 0 || mainOption == 1 || mainOption == 2)
         {
         isMainOpt = true;
         }
@@ -291,6 +536,10 @@
       if(mainOption == 1)
       {
         drawLines();
+      }
+      if(mainOption == 2)
+      {
+        snakeGame();
       }
     }
 
