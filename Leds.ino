@@ -4,10 +4,24 @@
     #define DIODE_COUNT 234
     #define ROWS 13
     #define COLUMNS 18
-    #define MAX_OPTION 2
+    #define MAX_OPTION 3
     #define MIN_OPTION 0
 
     #define DEBOUNCE_TIME 50
+
+    //buttons
+    #define BTN_LEFT 0
+    #define BTN_UP 1
+    #define BTN_RIGHT 2
+    #define BTN_DOWN 3
+    #define BTN_1 4
+    #define BTN_2 5
+
+    //FunctionsIDs
+    #define FACE_ID 0
+    #define LINES_ID 1
+    #define SNAKE_ID 2
+    #define ARKANOID_ID 3
 
     byte sprites[4][30] = {
       {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000011, 0b00000011, 0b00010010, 0b00010010, 0b01001000, 
@@ -50,6 +64,13 @@
         int snake_mode = 0; //-1 dead, 0 static, 1 playing
         int snake_delay = 30; //30 okresow po 100 milisekund czyli 3 sekundy
         bool snake_visible = true;
+      //
+
+      //dla Arkanoid game
+        int paletteSize = 3;
+        int palettePosOnStart = (COLUMNS / 2) - (paletteSize / 2) - 1;
+        int palettePos = palettePosOnStart;
+        int maxPalettePos = COLUMNS - paletteSize;
       //
 
       //dla ogolnego menu
@@ -120,9 +141,8 @@
       {
         refresh = true;
         if(spriteNr % 3 == 0)
-        {
-        spriteInc = -spriteInc;
-        }
+          spriteInc = -spriteInc;
+
         spriteNr += spriteInc;
         if(spriteNr != 0)
           actDelay = 100;
@@ -256,9 +276,8 @@
         snake_visible = true;
 
       for(int i = 0; i < tail_len; i++)
-      {
         colorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[1], 100);
-      }
+        
       delay(100);
     }
 
@@ -315,10 +334,8 @@
       }
       else
       {
-        for(int i = 0; i < tail_len; i++)
-        { //usuwaj weza
+        for(int i = 0; i < tail_len; i++) //usuwaj weza
           colorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[0], 100);
-        }
       }
 
       colorSingle(fruit_pos[1] * COLUMNS + fruit_pos[0], colors[7], 100);
@@ -369,23 +386,33 @@
         }
         else
         {
-          for(int i = 0; i < tail_len; i++)
-          { //usuwaj weza
+          for(int i = 0; i < tail_len; i++) //usuwaj weza
             colorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[0], 100);
-          }
         }
         if(snake_mode == -1)
         {
           snake_visible = !snake_visible;
           snake_delay--;
           if(snake_delay <= 0)
-          {
             reset_snake();
-          }
         }
           
         delay(100);
       }
+    }
+
+    void arkanoidGame()
+    {
+      for(int i = 0; i < paletteSize; i++)
+        colorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[7], 100);
+
+      if(palettePos > 0)
+        colorSingle((ROWS - 1) * COLUMNS + palettePos - 1, colors[0], 100);
+
+      if(palettePos < maxPalettePos)
+        colorSingle((ROWS - 1) * COLUMNS + palettePos + paletteSize, colors[0], 100);
+      
+      delay(100);
     }
      
     void setup()
@@ -414,27 +441,32 @@
     if(isMainOpt)
       delay(20);
       
-    if(bitRead(flags, 0))
+    if(bitRead(flags, BTN_LEFT))
     { //left
       if(!isMainOpt)
       {
-        if(mainOption == 0)
+        if(mainOption == FACE_ID)
         { //twarz
         option--;
         if(option < 0)
           option = 4;
         }
-        if(mainOption == 2)
+        if(mainOption == SNAKE_ID)
         { //snakeGame
           if(snake_dir != 0 && snake_mode == 1)
             snake_dir = 2;
           if(snake_mode == 0)
             snake_mode = 1;
         }
+        if(mainOption == ARKANOID_ID)
+        {
+          if(palettePos > 0)
+            palettePos--;
+        }
       }
-      bitClear(flags, 0);
+      bitClear(flags, BTN_LEFT);
     }
-    if(bitRead(flags, 1))
+    if(bitRead(flags, BTN_UP))
     { //up
       if(isMainOpt)
       {
@@ -444,7 +476,7 @@
       }
       else
       {
-        if(mainOption == 2)
+        if(mainOption == SNAKE_ID)
         { //snakeGame
           if(snake_dir != 1  && snake_mode == 1)
             snake_dir = 3;
@@ -452,29 +484,36 @@
             snake_mode = 1;
         }
       }
-      bitClear(flags, 1);
+      bitClear(flags, BTN_UP);
     }
-    if(bitRead(flags, 2))
+    if(bitRead(flags, BTN_RIGHT))
     { //right
       if(!isMainOpt)
       {
-        if(mainOption == 0)
+        if(mainOption == FACE_ID)
         { //twarz
         option++;
         if(option > 4)
           option = 0;
         }
-        if(mainOption == 2)
+        if(mainOption == SNAKE_ID)
         { //snakeGame
           if(snake_dir != 2 && snake_mode == 1)
             snake_dir = 0;
           if(snake_mode == 0)
             snake_mode = 1;
         }
+        if(mainOption == ARKANOID_ID)
+        {
+          if(palettePos < maxPalettePos)
+            palettePos++;
+        }
       }
-      bitClear(flags, 2);
+
+      if(mainOption != ARKANOID_ID)
+        bitClear(flags, BTN_RIGHT);
     }
-    if(bitRead(flags, 3))
+    if(bitRead(flags, BTN_DOWN))
     { //down
       if(isMainOpt)
       {
@@ -484,7 +523,7 @@
       }
       else
       {
-        if(mainOption == 2)
+        if(mainOption == SNAKE_ID)
         { //snakeGame
           if(snake_dir != 3 && snake_mode == 1)
             snake_dir = 1;
@@ -492,55 +531,51 @@
             snake_mode = 1;
         }
       }
-      bitClear(flags, 3);
+      bitClear(flags, BTN_DOWN);
     }
-    if(bitRead(flags, 4))
+    if(bitRead(flags, BTN_1))
     { //btn1 wlacza aplikacje
       if(isMainOpt)
       {
         isMainOpt = false;
         pixels.clear();
-        if(mainOption == 2)
-        {
+        
+        if(mainOption == SNAKE_ID)
           reset_snake();
-        }
+        
+        if(mainOption == ARKANOID_ID)
+          palettePos = palettePosOnStart;
       }
-      bitClear(flags, 4);
+      bitClear(flags, BTN_1);
     }
-    if(bitRead(flags, 5))
+    if(bitRead(flags, BTN_2))
     { //btn2 wylacza aplikacje
-      if(!isMainOpt)
-      {
-        if(mainOption == 0 || mainOption == 1 || mainOption == 2)
-        {
+      if(!isMainOpt && (mainOption >= MIN_OPTION && mainOption <= MAX_OPTION))
         isMainOpt = true;
-        }
-      }
-      bitClear(flags, 5);
+      bitClear(flags, BTN_2);
     }
 
     if(refresh && isMainOpt)
     {
       pixels.clear();
       for(int i = 0; i < 3; i++)
-      colorSingle(i + COLUMNS * mainOption, colors[mainOption + 1], 100);
+        colorSingle(i + COLUMNS * mainOption, colors[mainOption + 1], 100);
       refresh = false;
     }
 
     if(!isMainOpt)
     {
-      if(mainOption == 0)
-      {
+      if(mainOption == FACE_ID)
         blinkingEyes(option + 1);
-      }
-      if(mainOption == 1)
-      {
+
+      if(mainOption == LINES_ID)
         drawLines();
-      }
-      if(mainOption == 2)
-      {
+
+      if(mainOption == SNAKE_ID)
         snakeGame();
-      }
+
+      if(mainOption == ARKANOID_ID)
+        arkanoidGame();
     }
 
     pixels.show();
@@ -550,21 +585,35 @@
     {
       switches = PINK; // get PORTK value
       refresh = true;
-
+      //masz sobie zrobic druga zmienna flag ale te maja sie resetowac same
+      //a te pierwsze po staremu recznie
+      //dlaczego? bo debounce moze psuc miedzy delayami cos wiec lepiej robic tak :>
       if(millis() - lastIntMillis > DEBOUNCE_TIME)
       {
-      if(!bitRead(switches, 0)) //left
-        bitSet(flags, 0);
-      if(!bitRead(switches, 1)) //up
-        bitSet(flags, 1);
-      if(!bitRead(switches, 2)) //right
-        bitSet(flags, 2);
-      if(!bitRead(switches, 3)) //down
-        bitSet(flags, 3);
-      if(!bitRead(switches, 4)) //btn1
-        bitSet(flags, 4);
-      if(!bitRead(switches, 5)) //btn2
-        bitSet(flags, 5);
+      if(!bitRead(switches, BTN_LEFT)) //left
+        bitSet(flags, BTN_LEFT);
+      else
+        bitClear(flags, BTN_LEFT);
+      if(!bitRead(switches, BTN_UP)) //up
+        bitSet(flags, BTN_UP);
+      else
+        bitClear(flags, BTN_UP);
+      if(!bitRead(switches, BTN_RIGHT)) //right
+        bitSet(flags, BTN_RIGHT);
+      else
+        bitClear(flags, BTN_RIGHT);
+      if(!bitRead(switches, BTN_DOWN)) //down
+        bitSet(flags, BTN_DOWN);
+      else
+        bitClear(flags, BTN_DOWN);
+      if(!bitRead(switches, BTN_1)) //btn1
+        bitSet(flags, BTN_1);
+      else
+        bitClear(flags, BTN_1);
+      if(!bitRead(switches, BTN_2)) //btn2
+        bitSet(flags, BTN_2);
+      else
+        bitClear(flags, BTN_2);
       }
              lastIntMillis = millis();
       Serial.println(switches, BIN);
