@@ -77,7 +77,8 @@
         int mainOption = 0; //główne menu
         bool isMainOpt = true;  //czy jestesmy w glownym menu
         int option = 0;     //menu podrzędne dla "aplikacji"
-        byte flags = 0b00000000;
+        byte flags_oneClick = 0b00000000;
+        byte flags_holdClick = 0b00000000;
       //
      
     Adafruit_NeoPixel pixels = Adafruit_NeoPixel(DIODE_COUNT, PIN, NEO_GRB + NEO_KHZ800);
@@ -404,7 +405,7 @@
     void arkanoidGame()
     {
       for(int i = 0; i < paletteSize; i++)
-        colorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[7], 100);
+        colorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[7], 100 / (i + 1));
 
       if(palettePos > 0)
         colorSingle((ROWS - 1) * COLUMNS + palettePos - 1, colors[0], 100);
@@ -412,7 +413,7 @@
       if(palettePos < maxPalettePos)
         colorSingle((ROWS - 1) * COLUMNS + palettePos + paletteSize, colors[0], 100);
       
-      delay(100);
+      delay(50);
     }
      
     void setup()
@@ -441,7 +442,7 @@
     if(isMainOpt)
       delay(20);
       
-    if(bitRead(flags, BTN_LEFT))
+    if(bitRead(flags_oneClick, BTN_LEFT))
     { //left
       if(!isMainOpt)
       {
@@ -458,15 +459,23 @@
           if(snake_mode == 0)
             snake_mode = 1;
         }
+      }
+      bitClear(flags_oneClick, BTN_LEFT);
+    }
+
+    if(bitRead(flags_holdClick, BTN_LEFT))
+    {
+      if(!isMainOpt)
+      {
         if(mainOption == ARKANOID_ID)
         {
           if(palettePos > 0)
             palettePos--;
         }
       }
-      bitClear(flags, BTN_LEFT);
     }
-    if(bitRead(flags, BTN_UP))
+    
+    if(bitRead(flags_oneClick, BTN_UP))
     { //up
       if(isMainOpt)
       {
@@ -484,9 +493,9 @@
             snake_mode = 1;
         }
       }
-      bitClear(flags, BTN_UP);
+      bitClear(flags_oneClick, BTN_UP);
     }
-    if(bitRead(flags, BTN_RIGHT))
+    if(bitRead(flags_oneClick, BTN_RIGHT))
     { //right
       if(!isMainOpt)
       {
@@ -503,17 +512,23 @@
           if(snake_mode == 0)
             snake_mode = 1;
         }
+      }
+      bitClear(flags_oneClick, BTN_RIGHT);
+    }
+
+    if(bitRead(flags_holdClick, BTN_RIGHT))
+    { //right
+      if(!isMainOpt)
+      {
         if(mainOption == ARKANOID_ID)
         {
           if(palettePos < maxPalettePos)
             palettePos++;
         }
       }
-
-      if(mainOption != ARKANOID_ID)
-        bitClear(flags, BTN_RIGHT);
     }
-    if(bitRead(flags, BTN_DOWN))
+    
+    if(bitRead(flags_oneClick, BTN_DOWN))
     { //down
       if(isMainOpt)
       {
@@ -531,9 +546,9 @@
             snake_mode = 1;
         }
       }
-      bitClear(flags, BTN_DOWN);
+      bitClear(flags_oneClick, BTN_DOWN);
     }
-    if(bitRead(flags, BTN_1))
+    if(bitRead(flags_oneClick, BTN_1))
     { //btn1 wlacza aplikacje
       if(isMainOpt)
       {
@@ -546,13 +561,13 @@
         if(mainOption == ARKANOID_ID)
           palettePos = palettePosOnStart;
       }
-      bitClear(flags, BTN_1);
+      bitClear(flags_oneClick, BTN_1);
     }
-    if(bitRead(flags, BTN_2))
+    if(bitRead(flags_oneClick, BTN_2))
     { //btn2 wylacza aplikacje
       if(!isMainOpt && (mainOption >= MIN_OPTION && mainOption <= MAX_OPTION))
         isMainOpt = true;
-      bitClear(flags, BTN_2);
+      bitClear(flags_oneClick, BTN_2);
     }
 
     if(refresh && isMainOpt)
@@ -585,35 +600,56 @@
     {
       switches = PINK; // get PORTK value
       refresh = true;
-      //masz sobie zrobic druga zmienna flag ale te maja sie resetowac same
-      //a te pierwsze po staremu recznie
-      //dlaczego? bo debounce moze psuc miedzy delayami cos wiec lepiej robic tak :>
+      
       if(millis() - lastIntMillis > DEBOUNCE_TIME)
       {
       if(!bitRead(switches, BTN_LEFT)) //left
-        bitSet(flags, BTN_LEFT);
-      else
-        bitClear(flags, BTN_LEFT);
+      {
+        bitSet(flags_oneClick, BTN_LEFT);
+        bitSet(flags_holdClick, BTN_LEFT);
+      }
+      else if(!bitRead(flags_oneClick, BTN_LEFT))
+        bitClear(flags_holdClick, BTN_LEFT);
+        
       if(!bitRead(switches, BTN_UP)) //up
-        bitSet(flags, BTN_UP);
-      else
-        bitClear(flags, BTN_UP);
+      {
+        bitSet(flags_oneClick, BTN_UP);
+        bitSet(flags_holdClick, BTN_UP);
+      }
+      else if(!bitRead(flags_oneClick, BTN_UP))
+        bitClear(flags_holdClick, BTN_UP);
+        
       if(!bitRead(switches, BTN_RIGHT)) //right
-        bitSet(flags, BTN_RIGHT);
-      else
-        bitClear(flags, BTN_RIGHT);
+      {
+        bitSet(flags_oneClick, BTN_RIGHT);
+        bitSet(flags_holdClick, BTN_RIGHT);
+      }
+      else if(!bitRead(flags_oneClick, BTN_RIGHT))
+        bitClear(flags_holdClick, BTN_RIGHT);
+        
       if(!bitRead(switches, BTN_DOWN)) //down
-        bitSet(flags, BTN_DOWN);
-      else
-        bitClear(flags, BTN_DOWN);
+      {
+        bitSet(flags_oneClick, BTN_DOWN);
+        bitSet(flags_holdClick, BTN_DOWN);
+      }
+      else if(!bitRead(flags_oneClick, BTN_DOWN))
+        bitClear(flags_holdClick, BTN_DOWN);
+        
       if(!bitRead(switches, BTN_1)) //btn1
-        bitSet(flags, BTN_1);
-      else
-        bitClear(flags, BTN_1);
+      {
+        bitSet(flags_oneClick, BTN_1);
+        bitSet(flags_holdClick, BTN_1);
+      }
+      else if(!bitRead(flags_oneClick, BTN_1))
+        bitClear(flags_holdClick, BTN_1);
+        
       if(!bitRead(switches, BTN_2)) //btn2
-        bitSet(flags, BTN_2);
-      else
-        bitClear(flags, BTN_2);
+      {
+        bitSet(flags_oneClick, BTN_2);
+        bitSet(flags_holdClick, BTN_2);
+      }
+      else if(!bitRead(flags_oneClick, BTN_2))
+        bitClear(flags_holdClick, BTN_2);
       }
              lastIntMillis = millis();
       Serial.println(switches, BIN);
