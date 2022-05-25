@@ -405,7 +405,7 @@
     void arkanoidGame()
     {
       for(int i = 0; i < paletteSize; i++)
-        colorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[7], 100 / (i + 1));
+        colorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[7], 100);
 
       if(palettePos > 0)
         colorSingle((ROWS - 1) * COLUMNS + palettePos - 1, colors[0], 100);
@@ -600,57 +600,60 @@
     {
       switches = PINK; // get PORTK value
       refresh = true;
-      
+
+      //buttony na click
       if(millis() - lastIntMillis > DEBOUNCE_TIME)
       {
-      if(!bitRead(switches, BTN_LEFT)) //left
-      {
-        bitSet(flags_oneClick, BTN_LEFT);
-        bitSet(flags_holdClick, BTN_LEFT);
+        if(!bitRead(switches, BTN_LEFT)) //left
+          bitSet(flags_oneClick, BTN_LEFT);
+          
+        if(!bitRead(switches, BTN_UP)) //up
+          bitSet(flags_oneClick, BTN_UP);
+          
+        if(!bitRead(switches, BTN_RIGHT)) //right
+          bitSet(flags_oneClick, BTN_RIGHT);
+          
+        if(!bitRead(switches, BTN_DOWN)) //down
+          bitSet(flags_oneClick, BTN_DOWN);
+          
+        if(!bitRead(switches, BTN_1)) //btn1
+          bitSet(flags_oneClick, BTN_1);
+          
+        if(!bitRead(switches, BTN_2)) //btn2
+          bitSet(flags_oneClick, BTN_2);
       }
-      else if(!bitRead(flags_oneClick, BTN_LEFT))
-        bitClear(flags_holdClick, BTN_LEFT);
-        
-      if(!bitRead(switches, BTN_UP)) //up
-      {
-        bitSet(flags_oneClick, BTN_UP);
-        bitSet(flags_holdClick, BTN_UP);
-      }
-      else if(!bitRead(flags_oneClick, BTN_UP))
-        bitClear(flags_holdClick, BTN_UP);
-        
-      if(!bitRead(switches, BTN_RIGHT)) //right
-      {
-        bitSet(flags_oneClick, BTN_RIGHT);
-        bitSet(flags_holdClick, BTN_RIGHT);
-      }
-      else if(!bitRead(flags_oneClick, BTN_RIGHT))
-        bitClear(flags_holdClick, BTN_RIGHT);
-        
-      if(!bitRead(switches, BTN_DOWN)) //down
-      {
-        bitSet(flags_oneClick, BTN_DOWN);
-        bitSet(flags_holdClick, BTN_DOWN);
-      }
-      else if(!bitRead(flags_oneClick, BTN_DOWN))
-        bitClear(flags_holdClick, BTN_DOWN);
-        
-      if(!bitRead(switches, BTN_1)) //btn1
-      {
-        bitSet(flags_oneClick, BTN_1);
-        bitSet(flags_holdClick, BTN_1);
-      }
-      else if(!bitRead(flags_oneClick, BTN_1))
-        bitClear(flags_holdClick, BTN_1);
-        
-      if(!bitRead(switches, BTN_2)) //btn2
-      {
-        bitSet(flags_oneClick, BTN_2);
-        bitSet(flags_holdClick, BTN_2);
-      }
-      else if(!bitRead(flags_oneClick, BTN_2))
-        bitClear(flags_holdClick, BTN_2);
-      }
-             lastIntMillis = millis();
+
+      //buttony na przytrzymanie
+        if(!bitRead(switches, BTN_LEFT)) //left
+          bitSet(flags_holdClick, BTN_LEFT);
+        else
+          bitClear(flags_holdClick, BTN_LEFT);
+          
+        if(!bitRead(switches, BTN_UP)) //up
+          bitSet(flags_holdClick, BTN_UP);
+        else
+          bitClear(flags_holdClick, BTN_UP);
+          
+        if(!bitRead(switches, BTN_RIGHT)) //right
+          bitSet(flags_holdClick, BTN_RIGHT);
+        else
+          bitClear(flags_holdClick, BTN_RIGHT);
+          
+        if(!bitRead(switches, BTN_DOWN)) //down
+          bitSet(flags_holdClick, BTN_DOWN);
+        else
+          bitClear(flags_holdClick, BTN_DOWN);
+          
+        if(!bitRead(switches, BTN_1)) //btn1
+          bitSet(flags_holdClick, BTN_1);
+        else
+          bitClear(flags_holdClick, BTN_1);
+          
+        if(!bitRead(switches, BTN_2)) //btn2
+          bitSet(flags_holdClick, BTN_2);
+        else
+          bitClear(flags_holdClick, BTN_2);
+      
+      lastIntMillis = millis();
       Serial.println(switches, BIN);
     }
