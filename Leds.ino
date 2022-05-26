@@ -71,6 +71,9 @@
         int palettePosOnStart = (COLUMNS / 2) - (paletteSize / 2) - 1;
         int palettePos = palettePosOnStart;
         int maxPalettePos = COLUMNS - paletteSize;
+        float ballPosition[2];
+        float ballDirection[2];
+        float ballSpeed = 0.7f;
       //
 
       //dla ogolnego menu
@@ -402,8 +405,27 @@
       }
     }
 
+    void normalize(float pos[2])
+    {
+      float magnitude = sqrt(pow(pos[0], 2) + pow(pos[1], 2));
+      pos[0] /= magnitude;
+      pos[1] /= magnitude;
+    }
+
+    void reset_arkanoid()
+    {
+      palettePos = palettePosOnStart;
+      ballPosition[0] = (COLUMNS / 2) - 1;
+      ballPosition[1] = ROWS - 2;
+
+      ballDirection[0] = 0.3f;
+      ballDirection[1] = -1;
+      normalize(ballDirection);
+    }
+
     void arkanoidGame()
     {
+      //poruszanie paletki
       for(int i = 0; i < paletteSize; i++)
         colorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[7], 100);
 
@@ -412,6 +434,22 @@
 
       if(palettePos < maxPalettePos)
         colorSingle((ROWS - 1) * COLUMNS + palettePos + paletteSize, colors[0], 100);
+      //______________________
+
+      //poruszanie pileczki
+      colorSingle(((int)(ballPosition[1] + 0.5f)) * COLUMNS + (int)(ballPosition[0] + 0.5f), colors[0], 100); //zamalowywanie poprzedniej
+
+      ballPosition[0] += ballDirection[0] * ballSpeed;
+      ballPosition[1] += ballDirection[1] * ballSpeed;
+
+      if(ballPosition[0] <= 0 || ballPosition[0] >= (COLUMNS - 1))
+        ballDirection[0] = -ballDirection[0];
+
+      if(ballPosition[1] <= 0 || ballPosition[1] >= (ROWS - 1))
+        ballDirection[1] = -ballDirection[1];
+
+      colorSingle(((int)(ballPosition[1] + 0.5f)) * COLUMNS + (int)(ballPosition[0] + 0.5f), colors[14], 100);
+      //______________________
       
       delay(50);
     }
@@ -559,7 +597,7 @@
           reset_snake();
         
         if(mainOption == ARKANOID_ID)
-          palettePos = palettePosOnStart;
+          reset_arkanoid();
       }
       bitClear(flags_oneClick, BTN_1);
     }
