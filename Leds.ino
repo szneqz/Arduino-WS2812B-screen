@@ -56,7 +56,7 @@
       //
 
       //dla Sanke game
-        int snakeSgt[DIODE_COUNT][2];
+        int snakeSgt[DIODE_COUNT][2]; //wspolne dla arkanoid
         int head = 0;
         int tail_len = 3;
         int snake_dir = 0;  //0 - right, 1 - down, 2 - left, 3 - up
@@ -90,6 +90,7 @@
     unsigned long lastIntMillis = 0;
     int colors[16][3] = {{0, 0, 0}, {0, 0, 255}, {0, 128, 128}, {0, 255, 0}, {128, 128, 0}, {255, 0, 0}, {128, 0, 128}, {85, 85, 85}, 
                         {51, 102, 102}, {102, 51, 102}, {102, 102, 51}, {0, 85, 170}, {0, 170, 85}, {85, 170, 0}, {170, 85, 0}, {170, 0, 85}};
+    int colorsRGB[3] = {1, 3, 5};
 
     void colorSingleAdd(int nr, int *color, int sat)
     {
@@ -421,6 +422,21 @@
       ballDirection[0] = 0.3f;
       ballDirection[1] = -1;
       normalize(ballDirection);
+
+      for(int i = 0; i < DIODE_COUNT; i++)
+        snakeSgt[i][0] = 0;
+
+      for(int i = 1; i < COLUMNS - 1; i++)
+        for(int j = 1; j < ROWS / 2; j++)
+          snakeSgt[j * COLUMNS + i][0] = 1;
+
+      for(int i = 2; i < COLUMNS - 2; i++)
+        for(int j = 2; j < ROWS / 2 - 1; j++)
+          snakeSgt[j * COLUMNS + i][0] = 2;
+
+      for(int i = 3; i < COLUMNS - 3; i++)
+        for(int j = 3; j < ROWS / 2 - 2; j++)
+          snakeSgt[j * COLUMNS + i][0] = 3;
     }
 
     void arkanoidGame()
@@ -436,11 +452,25 @@
         colorSingle((ROWS - 1) * COLUMNS + palettePos + paletteSize, colors[0], 100);
       //______________________
 
+      //elementy zniszczalne
+      for(int i = 0; i < DIODE_COUNT; i++)
+      {
+        if(snakeSgt[i][0] > 0)
+          colorSingle(i, colors[colorsRGB[snakeSgt[i][0] - 1]], 25);
+      }
+      //______________________
+
       //poruszanie pileczki
-      colorSingle(((int)(ballPosition[1] + 0.5f)) * COLUMNS + (int)(ballPosition[0] + 0.5f), colors[0], 100); //zamalowywanie poprzedniej
+      int actPosition = (int)(ballPosition[1] + 0.5f) * COLUMNS + (int)(ballPosition[0] + 0.5f);
+      colorSingle(actPosition, colors[0], 100); //zamalowywanie poprzedniej
 
       ballPosition[0] += ballDirection[0] * ballSpeed;
       ballPosition[1] += ballDirection[1] * ballSpeed;
+        //tutaj sprawdz czy nie najezdzam na punkt fizyczny i zatrzymaj poruszanie
+      ballPosition[0] = min(max(ballPosition[0], 0.0f), COLUMNS - 1);
+      ballPosition[1] = min(max(ballPosition[1], 0.0f), ROWS - 1);
+
+      actPosition = (int)(ballPosition[1] + 0.5f) * COLUMNS + (int)(ballPosition[0] + 0.5f);
 
       if(ballPosition[0] <= 0 || ballPosition[0] >= (COLUMNS - 1))
         ballDirection[0] = -ballDirection[0];
@@ -448,7 +478,34 @@
       if(ballPosition[1] <= 0 || ballPosition[1] >= (ROWS - 1))
         ballDirection[1] = -ballDirection[1];
 
-      colorSingle(((int)(ballPosition[1] + 0.5f)) * COLUMNS + (int)(ballPosition[0] + 0.5f), colors[14], 100);
+      //czy uderzam w klocki zniszczalne
+
+      if(snakeSgt[actPosition + 1][0] > 0 && ballDirection[0] > 0)
+      { //prawo odbicie
+        snakeSgt[actPosition + 1][0]--;
+        colorSingle(actPosition + 1, colors[0], 100);
+        ballDirection[0] = -ballDirection[0];
+      }
+      else if(snakeSgt[actPosition - 1][0] > 0 && ballDirection[0] < 0)
+      { //lewo odbicie
+        snakeSgt[actPosition - 1][0]--;
+        colorSingle(actPosition - 1, colors[0], 100);
+        ballDirection[0] = -ballDirection[0];
+      }
+      else if(snakeSgt[actPosition + COLUMNS][0] > 0 && ballDirection[1] > 0)
+      { //dół odbicie
+        snakeSgt[actPosition + COLUMNS][0]--;
+        colorSingle(actPosition + COLUMNS, colors[0], 100);
+        ballDirection[1] = -ballDirection[1];
+      }
+      else if(snakeSgt[actPosition - COLUMNS][0] > 0 && ballDirection[1] < 0)
+      { //góra odbicie
+        snakeSgt[actPosition - COLUMNS][0]--;
+        colorSingle(actPosition - COLUMNS, colors[0], 100);
+        ballDirection[1] = -ballDirection[1];
+      }
+
+      colorSingle(actPosition, colors[14], 100);
       //______________________
       
       delay(50);
