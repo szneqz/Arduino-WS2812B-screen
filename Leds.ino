@@ -73,7 +73,9 @@
         int maxPalettePos = COLUMNS - paletteSize;
         float ballPosition[2];
         float ballDirection[2];
-        float ballSpeed = 0.7f;
+        float ballSpeed = 0.55f;
+        int arkanoid_mode = 0; //-1 dead, 0 static, 1 playing
+        int arkanoid_lives = 3;
       //
 
       //dla ogolnego menu
@@ -413,8 +415,12 @@
       pos[1] /= magnitude;
     }
 
-    void reset_arkanoid()
+    void reset_arkanoid_ball()
     {
+      //usuwanie poprzedniej paletki
+      for(int i = 0; i < paletteSize; i++)
+        colorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[0], 100);
+
       palettePos = palettePosOnStart;
       ballPosition[0] = (COLUMNS / 2) - 1;
       ballPosition[1] = ROWS - 2;
@@ -422,6 +428,18 @@
       ballDirection[0] = 0.3f;
       ballDirection[1] = -1;
       normalize(ballDirection);
+
+      if(arkanoid_lives > 0)
+        arkanoid_mode = 0;
+      else
+        arkanoid_mode = -1;
+    }
+
+    void reset_arkanoid()
+    {
+      arkanoid_lives = paletteSize;
+
+      reset_arkanoid_ball();
 
       for(int i = 0; i < DIODE_COUNT; i++)
         snakeSgt[i][0] = 0;
@@ -443,7 +461,12 @@
     {
       //poruszanie paletki
       for(int i = 0; i < paletteSize; i++)
-        colorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[7], 100);
+      {
+        if(i < arkanoid_lives)
+          colorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[3], 100);
+        else
+          colorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[5], 100);
+      }
 
       if(palettePos > 0)
         colorSingle((ROWS - 1) * COLUMNS + palettePos - 1, colors[0], 100);
@@ -462,13 +485,17 @@
 
       //poruszanie pileczki
       int actPosition = (int)(ballPosition[1] + 0.5f) * COLUMNS + (int)(ballPosition[0] + 0.5f);
+      int nextPosition = (int)(ballPosition[1] + ballDirection[1] * ballSpeed + 0.5f) * COLUMNS + (int)(ballPosition[0] + ballDirection[0] * ballSpeed + 0.5f);
       colorSingle(actPosition, colors[0], 100); //zamalowywanie poprzedniej
 
-      ballPosition[0] += ballDirection[0] * ballSpeed;
-      ballPosition[1] += ballDirection[1] * ballSpeed;
-        //tutaj sprawdz czy nie najezdzam na punkt fizyczny i zatrzymaj poruszanie
-      ballPosition[0] = min(max(ballPosition[0], 0.0f), COLUMNS - 1);
-      ballPosition[1] = min(max(ballPosition[1], 0.0f), ROWS - 1);
+      if(snakeSgt[nextPosition][0] == 0 && arkanoid_mode == 1)
+      { //czy nie najeżdżam na statyczny obiekt po odbiciu
+        ballPosition[0] += ballDirection[0] * ballSpeed;
+        ballPosition[1] += ballDirection[1] * ballSpeed;
+
+        ballPosition[0] = min(max(ballPosition[0], 0.0f), COLUMNS - 1);
+        ballPosition[1] = min(max(ballPosition[1], 0.0f), ROWS - 1);
+      }
 
       actPosition = (int)(ballPosition[1] + 0.5f) * COLUMNS + (int)(ballPosition[0] + 0.5f);
 
@@ -478,31 +505,64 @@
       if(ballPosition[1] <= 0 || ballPosition[1] >= (ROWS - 1))
         ballDirection[1] = -ballDirection[1];
 
+      if(ballPosition[1] >= (ROWS - 1))
+      {
+        arkanoid_lives--;
+        reset_arkanoid_ball();
+        return;
+      }
+
       //czy uderzam w klocki zniszczalne
 
-      if(snakeSgt[actPosition + 1][0] > 0 && ballDirection[0] > 0)
+      //zabezpieczenie przed wyjscie poza tablicę, bo czasami nawet gry przełączał
+      int bounce = max(min(actPosition + 1, DIODE_COUNT - 1), 0);
+      if(snakeSgt[bounce][0] > 0 && ballDirection[0] > 0)
       { //prawo odbicie
-        snakeSgt[actPosition + 1][0]--;
-        colorSingle(actPosition + 1, colors[0], 100);
+        snakeSgt[bounce][0]--;
+        colorSingle(bounce, colors[0], 100);
         ballDirection[0] = -ballDirection[0];
       }
-      else if(snakeSgt[actPosition - 1][0] > 0 && ballDirection[0] < 0)
-      { //lewo odbicie
-        snakeSgt[actPosition - 1][0]--;
-        colorSingle(actPosition - 1, colors[0], 100);
-        ballDirection[0] = -ballDirection[0];
-      }
-      else if(snakeSgt[actPosition + COLUMNS][0] > 0 && ballDirection[1] > 0)
-      { //dół odbicie
-        snakeSgt[actPosition + COLUMNS][0]--;
-        colorSingle(actPosition + COLUMNS, colors[0], 100);
-        ballDirection[1] = -ballDirection[1];
-      }
-      else if(snakeSgt[actPosition - COLUMNS][0] > 0 && ballDirection[1] < 0)
-      { //góra odbicie
-        snakeSgt[actPosition - COLUMNS][0]--;
-        colorSingle(actPosition - COLUMNS, colors[0], 100);
-        ballDirection[1] = -ballDirection[1];
+      else                            //SPRAWDZAJ CZY WEJDE W ELEMENT BO TERAZ ROZWALA TEZ NADMIAROWO
+      {
+        bounce = max(min(actPosition - 1, DIODE_COUNT - 1), 0);
+        if(snakeSgt[bounce][0] > 0 && ballDirection[0] < 0)
+        { //lewo odbicie
+          snakeSgt[bounce][0]--;
+          colorSingle(bounce, colors[0], 100);
+          ballDirection[0] = -ballDirection[0];
+        }
+        else 
+        {
+          bounce = max(min(actPosition + COLUMNS, DIODE_COUNT - 1), 0);
+          if(snakeSgt[bounce][0] > 0 && ballDirection[1] > 0)
+          { //dół odbicie
+            snakeSgt[bounce][0]--;
+            colorSingle(bounce, colors[0], 100);
+            ballDirection[1] = -ballDirection[1];
+          }
+          else 
+          {
+            bounce = max(min(actPosition - COLUMNS, DIODE_COUNT - 1), 0);
+            if(snakeSgt[bounce][0] > 0 && ballDirection[1] < 0)
+            { //góra odbicie
+              snakeSgt[bounce][0]--;
+              colorSingle(bounce, colors[0], 100);
+              ballDirection[1] = -ballDirection[1];
+            }
+            else
+            { //dowolne uderzenie po przekątnej (rzadka sprawa)
+              nextPosition = (int)(ballPosition[1] + ballDirection[1] * ballSpeed + 0.5f) * COLUMNS + (int)(ballPosition[0] + ballDirection[0] * ballSpeed + 0.5f);
+              nextPosition = max(min(nextPosition, DIODE_COUNT - 1), 0);
+              if(snakeSgt[nextPosition][0] > 0)
+              {
+              snakeSgt[nextPosition][0]--;
+              colorSingle(nextPosition, colors[0], 100);
+              ballDirection[0] = -ballDirection[0];
+              ballDirection[1] = -ballDirection[1];
+              }
+            }
+          }
+        }
       }
 
       colorSingle(actPosition, colors[14], 100);
@@ -564,8 +624,10 @@
       {
         if(mainOption == ARKANOID_ID)
         {
-          if(palettePos > 0)
+          if(palettePos > 0 && arkanoid_mode != -1)
             palettePos--;
+          if(arkanoid_mode == 0)
+            arkanoid_mode = 1;
         }
       }
     }
@@ -617,8 +679,10 @@
       {
         if(mainOption == ARKANOID_ID)
         {
-          if(palettePos < maxPalettePos)
+          if(palettePos < maxPalettePos && arkanoid_mode != -1)
             palettePos++;
+          if(arkanoid_mode == 0)
+            arkanoid_mode = 1;
         }
       }
     }
