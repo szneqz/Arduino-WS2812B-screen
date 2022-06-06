@@ -76,6 +76,8 @@
         float ballSpeed = 0.55f;
         int arkanoid_mode = 0; //-1 dead, 0 static, 1 playing
         int arkanoid_lives = 3;
+        int max_respawn_time = 40;  //40 okresow po 50 milisekund czyli 2 sekundy
+        int respawn_time = 0;
       //
 
       //dla ogolnego menu
@@ -415,6 +417,28 @@
       pos[1] /= magnitude;
     }
 
+    float myTan(float oppositeAngle, float nextToAngle)
+    {
+      return oppositeAngle / nextToAngle;
+    }
+
+    void check45degAngle(float sidesLength[2])
+    {
+      float tangens = myTan(sidesLength[1], abs(sidesLength[0]));
+      if(tangens < 1.0f)
+      {
+        if(sidesLength[0] < 0.0f)
+          sidesLength[0] = -0.71f;
+        else
+          sidesLength[0] = 0.71f;
+        sidesLength[1] = 0.71f;
+      }
+      else
+      {
+        normalize(sidesLength);
+      }
+    }
+
     void reset_arkanoid_ball()
     {
       //usuwanie poprzedniej paletki
@@ -422,12 +446,17 @@
         colorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[0], 100);
 
       palettePos = palettePosOnStart;
+      respawn_time = 0;
       ballPosition[0] = (COLUMNS / 2) - 1;
       ballPosition[1] = ROWS - 2;
 
-      ballDirection[0] = 0.3f;
-      ballDirection[1] = -1;
-      normalize(ballDirection);
+      ballDirection[0] = (float)random(-100, 101) / 100.0f;
+      ballDirection[1] = (float)random(-100, 1) / 100.0f;
+      check45degAngle(ballDirection);
+
+      //ballDirection[0] = 0.3f;
+      //ballDirection[1] = -1;
+      //normalize(ballDirection);
 
       if(arkanoid_lives > 0)
         arkanoid_mode = 0;
@@ -509,6 +538,7 @@
       {
         arkanoid_lives--;
         reset_arkanoid_ball();
+        respawn_time = max_respawn_time;
         return;
       }
 
@@ -522,7 +552,7 @@
         colorSingle(bounce, colors[0], 100);
         ballDirection[0] = -ballDirection[0];
       }
-      else                            //SPRAWDZAJ CZY WEJDE W ELEMENT BO TERAZ ROZWALA TEZ NADMIAROWO
+      else
       {
         bounce = max(min(actPosition - 1, DIODE_COUNT - 1), 0);
         if(snakeSgt[bounce][0] > 0 && ballDirection[0] < 0)
@@ -565,9 +595,24 @@
         }
       }
 
+      //Odbicie od paletki
+      if(ballDirection[1] > 0)
+      {
+        for(int i = 0; i < paletteSize; i++)
+        {
+          if(actPosition + COLUMNS == (ROWS - 1) * COLUMNS + palettePos + i)
+          {
+            ballDirection[1] = -ballDirection[1];
+          }
+        }
+      }
+
       colorSingle(actPosition, colors[14], 100);
       //______________________
       
+      if(respawn_time > 0)
+        respawn_time--;
+
       delay(50);
     }
      
@@ -624,9 +669,9 @@
       {
         if(mainOption == ARKANOID_ID)
         {
-          if(palettePos > 0 && arkanoid_mode != -1)
+          if(palettePos > 0 && arkanoid_mode != -1 && respawn_time <= 0)
             palettePos--;
-          if(arkanoid_mode == 0)
+          if(arkanoid_mode == 0 && respawn_time <= 0)
             arkanoid_mode = 1;
         }
       }
@@ -679,9 +724,9 @@
       {
         if(mainOption == ARKANOID_ID)
         {
-          if(palettePos < maxPalettePos && arkanoid_mode != -1)
+          if(palettePos < maxPalettePos && arkanoid_mode != -1 && respawn_time <= 0)
             palettePos++;
-          if(arkanoid_mode == 0)
+          if(arkanoid_mode == 0 && respawn_time <= 0)
             arkanoid_mode = 1;
         }
       }
