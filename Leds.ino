@@ -73,7 +73,7 @@
         int maxPalettePos = COLUMNS - paletteSize;
         float ballPosition[2];
         float ballDirection[2];
-        float ballSpeed = 0.55f;
+        float ballSpeed = 0.45f;
         int arkanoid_mode = 0; //-1 dead, 0 static, 1 playing
         int arkanoid_lives = 3;
         int max_respawn_time = 40;  //40 okresow po 50 milisekund czyli 2 sekundy
@@ -425,13 +425,13 @@
     void check45degAngle(float sidesLength[2])
     {
       float tangens = myTan(sidesLength[1], abs(sidesLength[0]));
-      if(tangens < 1.0f)
+      if(tangens > -1.0f)
       {
         if(sidesLength[0] < 0.0f)
           sidesLength[0] = -0.71f;
         else
           sidesLength[0] = 0.71f;
-        sidesLength[1] = 0.71f;
+        sidesLength[1] = -0.71f;
       }
       else
       {
@@ -453,10 +453,6 @@
       ballDirection[0] = (float)random(-100, 101) / 100.0f;
       ballDirection[1] = (float)random(-100, 1) / 100.0f;
       check45degAngle(ballDirection);
-
-      //ballDirection[0] = 0.3f;
-      //ballDirection[1] = -1;
-      //normalize(ballDirection);
 
       if(arkanoid_lives > 0)
         arkanoid_mode = 0;
@@ -603,6 +599,9 @@
           if(actPosition + COLUMNS == (ROWS - 1) * COLUMNS + palettePos + i)
           {
             ballDirection[1] = -ballDirection[1];
+            float center = palettePos + (paletteSize - 1) / 2;
+            ballDirection[0] += (ballPosition[0] - center) * 0.5f;
+            check45degAngle(ballDirection);
           }
         }
       }
