@@ -23,6 +23,10 @@
     #define SNAKE_ID 2
     #define ARKANOID_ID 3
 
+    //SpritesStaticValues
+    #define SPRITE_ANIMATED_EYES 0
+    #define MAX_SPRITE_NR 5
+
     byte sprites[4][30] = {
       {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000011, 0b00000011, 0b00010010, 0b00010010, 0b01001000, 
       0b01001000, 0b11000000, 0b11000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00010000, 0b00100000, 
@@ -41,9 +45,29 @@
       0b01000000, 0b10000000, 0b00000000, 0b00000010, 0b00000001, 0b11110000, 0b00000011, 0b00000000, 0b00000000, 0b00000000}
       };
 
+    byte staticSprites[][30] = {
+      {0b01111000, 0b01111000, 0b11110000, 0b11110011, 0b11100011, 0b11111100, 0b10011100, 0b11100001, 0b01100001, 0b00000110, 
+      0b10000011, 0b00111001, 0b00000000, 0b11000111, 0b00000001, 0b00001110, 0b00001110, 0b00011100, 0b01110000, 0b00111000, 
+      0b10000000, 0b01110011, 0b00000000, 0b11111100, 0b00000000, 0b11100000, 0b00000001, 0b00000000, 0b00000011, 0b00000000},
+
+      {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b10000000, 0b00000011, 0b00000111, 0b00001010, 0b00010100, 0b00111000, 
+      0b01110000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 
+      0b00100000, 0b00000000, 0b10000001, 0b11111111, 0b00000111, 0b11111110, 0b00011111, 0b00000000, 0b00000000, 0b00000000},
+
+      {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b11111100, 
+      0b11111100, 0b00110000, 0b00110000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00010000, 
+      0b10000000, 0b00111111, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000},
+
+      {0b00000100, 0b10000000, 0b00110000, 0b00000000, 0b11000011, 0b00000001, 0b00001110, 0b11111001, 0b00100111, 0b11000100, 
+      0b10001111, 0b00001000, 0b00000000, 0b00100100, 0b10000110, 0b10010001, 0b00011001, 0b01100110, 0b00000010, 0b00000000, 
+      0b10111001, 0b01001100, 0b01000111, 0b11001100, 0b00001000, 0b00000110, 0b00011000, 0b11100000, 0b00011111, 0b00000000}
+
+      }; 
+
       //dla spriteów
       bool refresh = true;  //flaga odśeiżania obrazka
       int spriteNr = 0;
+      int staticSpriteNr = 0;
       int spriteInc = -1;
       int actDelay = 0;
       //
@@ -161,11 +185,22 @@
 
       if(refresh)
       {
-      colorHEX(sprites[spriteNr], colors[nrColor], 50, colors[10], 2);
+      colorHEX(sprites[spriteNr], colors[nrColor], 50, colors[0], 2);
       refresh = false;
       }
       delay(20);
       actDelay -= 20;
+    }
+
+    void staticSprite()
+    {
+      int actSprite = staticSpriteNr - 1; //-1 bo jest tylko jeden niestatyczny obraz
+      if(refresh)
+      {
+        colorHEX(staticSprites[actSprite], colors[option + 1], 30, colors[0], 2);
+        refresh = false;
+      }
+      delay(20);
     }
 
     void drawLines()
@@ -648,6 +683,7 @@
         if(mainOption == FACE_ID)
         { //twarz
         option--;
+        refresh = true;
         if(option < 0)
           option = 4;
         }
@@ -686,6 +722,14 @@
       }
       else
       {
+        if(mainOption == FACE_ID)
+        {
+          staticSpriteNr--;
+          refresh = true;
+          if(staticSpriteNr < 0)
+            staticSpriteNr = MAX_SPRITE_NR - 1;
+        }
+
         if(mainOption == SNAKE_ID)
         { //snakeGame
           if(snake_dir != 1  && snake_mode == 1)
@@ -703,6 +747,7 @@
         if(mainOption == FACE_ID)
         { //twarz
         option++;
+        refresh = true;
         if(option > 4)
           option = 0;
         }
@@ -741,6 +786,13 @@
       }
       else
       {
+        if(mainOption == FACE_ID)
+        {
+          staticSpriteNr++;
+          refresh = true;
+          if(staticSpriteNr >= MAX_SPRITE_NR)
+            staticSpriteNr = 0;
+        }
         if(mainOption == SNAKE_ID)
         { //snakeGame
           if(snake_dir != 3 && snake_mode == 1)
@@ -756,6 +808,7 @@
       if(isMainOpt)
       {
         isMainOpt = false;
+        refresh = true;  //resetowanie ustawienia sprite
         pixels.clear();
         
         if(mainOption == SNAKE_ID)
@@ -784,7 +837,12 @@
     if(!isMainOpt)
     {
       if(mainOption == FACE_ID)
+      {
+      if(staticSpriteNr == SPRITE_ANIMATED_EYES)
         blinkingEyes(option + 1);
+      else
+        staticSprite();
+      }
 
       if(mainOption == LINES_ID)
         drawLines();
