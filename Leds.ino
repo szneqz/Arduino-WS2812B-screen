@@ -25,7 +25,11 @@
 
     //SpritesStaticValues
     #define SPRITE_ANIMATED_EYES 0
-    #define MAX_SPRITE_NR 5
+    #define SPRITE_COLORFUL_CAT 1
+    #define MAX_SPRITE_NR 7
+
+    //drawLines
+    #define LINES_AMOUNT 10
 
     byte sprites[4][30] = {
       {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000011, 0b00000011, 0b00010010, 0b00010010, 0b01001000, 
@@ -45,6 +49,57 @@
       0b01000000, 0b10000000, 0b00000000, 0b00000010, 0b00000001, 0b11110000, 0b00000011, 0b00000000, 0b00000000, 0b00000000}
       };
 
+    byte colorfulCatSprite[][30] = {
+      {0b00000100, 0b10000000, 0b00110000, 0b00000000, 0b01000011, 0b00000001, 0b00001010, 0b11010001, 0b00100010, 0b00000100, 
+      0b10000011, 0b00001000, 0b00000000, 0b00100100, 0b00000000, 0b00010000, 0b00000000, 0b00000000, 0b00000010, 0b00000000, 
+      0b00000001, 0b00000000, 0b01000000, 0b00000000, 0b00001000, 0b00000110, 0b00011000, 0b11100000, 0b00011111, 0b00000000},
+
+      {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b10000000, 0b00000000, 0b00000100, 0b00101000, 0b00000101, 0b11000000, 
+      0b00001100, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b10000000, 0b00000001, 0b01100000, 0b00000000, 0b00000000, 
+      0b00111000, 0b00000000, 0b00000111, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000},
+
+      {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 
+      0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b10000110, 0b00000001, 0b00011000, 0b00000110, 0b00000000, 0b00000000, 
+      0b10000000, 0b01001100, 0b00000000, 0b11001100, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000},
+
+      //sprite2
+      {0b00000000, 0b00000000, 0b00111000, 0b00000000, 0b01000111, 0b00000001, 0b00001010, 0b11010001, 0b00100010, 0b00000100, 
+      0b10000011, 0b00001000, 0b00000000, 0b00100100, 0b00000000, 0b00010000, 0b00000000, 0b00000000, 0b00000010, 0b00000000, 
+      0b00000001, 0b00000000, 0b01000000, 0b00000000, 0b00001000, 0b00000110, 0b00011000, 0b11100000, 0b00011111, 0b00000000},
+
+      {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b10000000, 0b00000000, 0b00000100, 0b00101000, 0b00000101, 0b11000000, 
+      0b00001100, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b10000000, 0b00000001, 0b01100000, 0b00000000, 0b00000000, 
+      0b00111000, 0b00000000, 0b00000111, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000},
+
+      {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 
+      0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000010, 0b00000001, 0b00010100, 0b00001010, 0b00000000, 0b00000000, 
+      0b00000000, 0b00110011, 0b00000000, 0b01111000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000},
+
+      //sprite3 only eyes blink :3
+      {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 
+      0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00011100, 0b00001110, 0b00000000, 0b00000000, 
+      0b10000000, 0b01001100, 0b00000000, 0b11001100, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000}
+    };
+
+    byte menuSprites[][30] = {
+      {0b00001111, 0b00000000, 0b00100000, 0b11111110, 0b10001111, 0b00001000, 0b00100000, 0b00100010, 0b10010001, 0b10001000, 
+      0b00000000, 0b00100010, 0b01000010, 0b10001000, 0b00001111, 0b00100001, 0b10100000, 0b10100000, 0b10000000, 0b01111100, 
+      0b00000010, 0b00000010, 0b00001000, 0b11111000, 0b00111111, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000},
+
+      {0b00000000, 0b01000010, 0b00111100, 0b00001000, 0b10001111, 0b00100000, 0b00000000, 0b10000010, 0b00000011, 0b00001000, 
+      0b11000000, 0b00100001, 0b00000000, 0b10000001, 0b00010111, 0b00000101, 0b01000000, 0b00010100, 0b00000000, 0b01010001, 
+      0b00000000, 0b01001100, 0b00000000, 0b00000000, 0b00000001, 0b00000000, 0b00000000, 0b00000000, 0b00111100, 0b00000000},
+
+      {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b11110000, 0b11100000, 0b00001111, 0b10000010, 0b00000000, 0b00001000, 
+      0b00000010, 0b00100000, 0b11111000, 0b10000111, 0b00000111, 0b00010000, 0b00000000, 0b01000000, 0b00000000, 0b00100000, 
+      0b00000001, 0b00000000, 0b00000100, 0b10000000, 0b00010000, 0b00000000, 0b01111110, 0b00000000, 0b00000000, 0b00000000},
+
+      {0b00000000, 0b00000000, 0b00000000, 0b10111100, 0b00000111, 0b11010000, 0b11011111, 0b01000011, 0b01001110, 0b00001000, 
+      0b00000000, 0b00100000, 0b00000000, 0b10000000, 0b00000111, 0b00000000, 0b00000000, 0b00001000, 0b00000000, 0b00000000, 
+      0b00000000, 0b00000000, 0b00000000, 0b11000000, 0b00000001, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000}
+
+    };
+
     byte staticSprites[][30] = {
       {0b01111000, 0b01111000, 0b11110000, 0b11110011, 0b11100011, 0b11111100, 0b10011100, 0b11100001, 0b01100001, 0b00000110, 
       0b10000011, 0b00111001, 0b00000000, 0b11000111, 0b00000001, 0b00001110, 0b00001110, 0b00011100, 0b01110000, 0b00111000, 
@@ -58,9 +113,13 @@
       0b11111100, 0b00110000, 0b00110000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00010000, 
       0b10000000, 0b00111111, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000},
 
-      {0b00000100, 0b10000000, 0b00110000, 0b00000000, 0b11000011, 0b00000001, 0b00001110, 0b11111001, 0b00100111, 0b11000100, 
-      0b10001111, 0b00001000, 0b00000000, 0b00100100, 0b10000110, 0b10010001, 0b00011001, 0b01100110, 0b00000010, 0b00000000, 
-      0b10111001, 0b01001100, 0b01000111, 0b11001100, 0b00001000, 0b00000110, 0b00011000, 0b11100000, 0b00011111, 0b00000000}
+      {0b10000000, 0b00000111, 0b10000000, 0b01100001, 0b00000000, 0b00110001, 0b00000010, 0b11000010, 0b00010000, 0b00001000, 
+      0b01000011, 0b00010000, 0b00001100, 0b01000010, 0b00110000, 0b00001000, 0b11000001, 0b00100000, 0b00001000, 0b01000000, 
+      0b00100000, 0b00001100, 0b00000001, 0b00110001, 0b00000010, 0b00011000, 0b00000110, 0b10000000, 0b00000111, 0b00000000},
+
+      {0b01000000, 0b00000000, 0b00010001, 0b10011100, 0b00000000, 0b11111001, 0b00000000, 0b01110000, 0b10000111, 0b11000000, 
+      0b01011000, 0b01001000, 0b01100000, 0b00000000, 0b11000000, 0b00000000, 0b11000000, 0b01001011, 0b00010000, 0b00000011, 
+      0b00000000, 0b00000000, 0b01000000, 0b00110100, 0b00000001, 0b11000000, 0b00000000, 0b00100000, 0b10000000, 0b00000000}
 
       }; 
 
@@ -70,13 +129,17 @@
       int staticSpriteNr = 0;
       int spriteInc = -1;
       int actDelay = 0;
+
+      //catSprite
+      bool isHappy = false;
       //
 
       //dla drawLines
-        int act[2] = {0, 0};
-        int dest[2] = {0, 0};
-        int colorNr = 1;
-        int dir = 0;
+        int act[LINES_AMOUNT][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
+        int dest[LINES_AMOUNT][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
+        int colorNr[LINES_AMOUNT] = {1, 2, 3, 5, 7, 8, 9, 10, 13, 15};
+        int nextColorNr = 1;
+        int dir[LINES_AMOUNT] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
       //
 
       //dla Sanke game
@@ -143,7 +206,7 @@
       pixels.setPixelColor(tmp, *(color) * sat / 100, *(color + 1) * sat / 100, *(color + 2) * sat / 100);
     }
 
-    void colorHEX(byte *sprite, int *color, int sat, int *bgColor, int bgSat)
+    void colorHEX(byte *sprite, int *color, int sat, int *bgColor, int bgSat, bool useBg = true)
     {
       for(int i = 0; i < DIODE_COUNT; i++)
       {
@@ -152,7 +215,7 @@
         int tmp3 = tmp % 8;
         if(bitRead(*(sprite + tmp2), tmp3))
         pixels.setPixelColor(i, *(color) * sat / 100, *(color + 1) * sat / 100, *(color + 2) * sat / 100);
-        else
+        else if(useBg)
         pixels.setPixelColor(i, *(bgColor) * bgSat / 100, *(bgColor + 1) * bgSat / 100, *(bgColor + 2) * bgSat / 100);
       }
     }
@@ -192,9 +255,42 @@
       actDelay -= 20;
     }
 
+    void colorfulCat()
+    {
+      if(refresh)
+      {
+        int offset = 0;
+        int blinkOffset = 0;
+
+        if(isHappy)
+          offset = 3;
+        
+        if(actDelay <= 0 && !isHappy)
+          blinkOffset = 4;
+
+        colorHEX(colorfulCatSprite[0 + offset], colors[option + 1], 30, colors[0], 2);
+        colorHEX(colorfulCatSprite[1 + offset], colors[option + 5], 30, colors[0], 2, false);
+        colorHEX(colorfulCatSprite[2 + offset + blinkOffset], colors[option + 9], 30, colors[0], 2, false);
+        refresh = false;
+      }
+
+      if(actDelay <= -500)
+      {
+        actDelay = random(3000, 8000);
+        refresh = true;
+      }
+      else
+        actDelay -= 20;
+
+      if(actDelay < 0 && actDelay >= -20)
+        refresh = true;
+
+      delay(20);
+    }
+
     void staticSprite()
     {
-      int actSprite = staticSpriteNr - 1; //-1 bo jest tylko jeden niestatyczny obraz
+      int actSprite = staticSpriteNr - 2; //-2 bo są dwa niestatyczne obrazy
       if(refresh)
       {
         colorHEX(staticSprites[actSprite], colors[option + 1], 30, colors[0], 2);
@@ -205,79 +301,84 @@
 
     void drawLines()
     { 
-      if((act[0] == dest[0] && act[1] == dest[1]) || act[0] >= COLUMNS || act[0] < 0 || act[1] >= ROWS || act[1] < 0)
+      for(int i = 0; i < LINES_AMOUNT; i++)
       {
-        colorNr++;
-        if(colorNr >= 16)
-          colorNr = 1;
-        if(random() % 2 == 0)
+        if((act[i][0] == dest[i][0] && act[i][1] == dest[i][1]) || act[i][0] >= COLUMNS || act[i][0] < 0 || act[i][1] >= ROWS || act[i][1] < 0)
         {
-          act[0] = (random() % 2) * (COLUMNS - 1);
-          act[1] = random() % (ROWS - 4) + 2;
-          dest[0] = random() % (COLUMNS - 4) + 2;
-          dest[1] = (random() % 2) * (ROWS - 1);
-          if(act[0] == 0)
-            dir = 1;
+          nextColorNr++;
+          if(nextColorNr >= 16)
+            nextColorNr = 1;
+          colorNr[i] = nextColorNr;
+
+          if(random() % 2 == 0)
+          {
+            act[i][0] = (random() % 2) * (COLUMNS - 1);
+            act[i][1] = random() % (ROWS - 4) + 2;
+            dest[i][0] = random() % (COLUMNS - 4) + 2;
+            dest[i][1] = (random() % 2) * (ROWS - 1);
+            if(act[i][0] == 0)
+              dir[i] = 1;
+            else
+              dir[i] = -1;
+          }
           else
-            dir = -1;
+          {
+            act[i][0] = random() % (COLUMNS - 4) + 2;
+            act[i][1] = (random() % 2) * (ROWS - 1);
+            dest[i][0] = (random() % 2) * (COLUMNS - 1);
+            dest[i][1] = random() % (ROWS - 4) + 2;
+            if(act[i][1] == 0)
+              dir[i] = 2;
+            else
+              dir[i] = -2;
+          }
         }
         else
         {
-          act[0] = random() % (COLUMNS - 4) + 2;
-          act[1] = (random() % 2) * (ROWS - 1);
-          dest[0] = (random() % 2) * (COLUMNS - 1);
-          dest[1] = random() % (ROWS - 4) + 2;
-          if(act[1] == 0)
-            dir = 2;
-          else
-            dir = -2;
+          if(abs(dir[i]) == 1 && act[i][0] == dest[i][0])
+          {
+            if(dest[i][1] == 0)
+              dir[i] = -2;
+            else
+              dir[i] = 2;
+          }
+    
+          if(abs(dir[i]) == 2 && act[i][1] == dest[i][1])
+          {
+            if(dest[i][0] == 0)
+              dir[i] = -1;
+            else
+              dir[i] = 1;
+          }
+    
+          if(dir[i] == 1)
+            act[i][0] = act[i][0] + 1;
+          if(dir[i] == -1)
+            act[i][0] = act[i][0] - 1;
+          if(dir[i] == 2)
+            act[i][1] = act[i][1] + 1;
+          if(dir[i] == -2)
+            act[i][1] = act[i][1] - 1;
         }
-      }
-      else
-      {
-        if(abs(dir) == 1 && act[0] == dest[0])
-        {
-          if(dest[1] == 0)
-            dir = -2;
-          else
-            dir = 2;
-        }
-  
-        if(abs(dir) == 2 && act[1] == dest[1])
-        {
-          if(dest[0] == 0)
-            dir = -1;
-          else
-            dir = 1;
-        }
-  
-        if(dir == 1)
-          act[0] = act[0] + 1;
-        if(dir == -1)
-          act[0] = act[0] - 1;
-        if(dir == 2)
-          act[1] = act[1] + 1;
-        if(dir == -2)
-          act[1] = act[1] - 1;
+        
+        colorSingleAdd(act[i][1] * COLUMNS + act[i][0], colors[colorNr[i]], 100);
       }
 
-      for(int i = 0; i < DIODE_COUNT; i++)
-      {
-        unsigned long gColor = pixels.getPixelColor(i);
-        byte gColors[3] = {0, 0, 0};
-        for(int j = 0; j < 3; j++)
+        for(int j = 0; j < DIODE_COUNT; j++)
         {
-          for(int k = 0; k < 8; k++)
+          unsigned long gColor = pixels.getPixelColor(j);
+          byte gColors[3] = {0, 0, 0};
+          for(int k = 0; k < 3; k++)
           {
-            bitWrite(gColors[j], k, bitRead(gColor, j * 8 + k));
+            for(int l = 0; l < 8; l++)
+            {
+              bitWrite(gColors[k], l, bitRead(gColor, k * 8 + l));
+            }
           }
+        
+          pixels.setPixelColor(j, gColors[2]/2,  gColors[1]/2,  gColors[0]/2);
         }
-       
-        pixels.setPixelColor(i, gColors[2]/1.05,  gColors[1]/1.05,  gColors[0]/1.05);
-      }
-      
-      colorSingleAdd(act[1] * COLUMNS + act[0], colors[colorNr], 100);
-      delay(100);
+      delay(20);
     }
 
     void spawn_fruit()
@@ -803,6 +904,7 @@
       }
       bitClear(flags_oneClick, BTN_DOWN);
     }
+
     if(bitRead(flags_oneClick, BTN_1))
     { //btn1 wlacza aplikacje
       if(isMainOpt)
@@ -819,6 +921,30 @@
       }
       bitClear(flags_oneClick, BTN_1);
     }
+
+    if(bitRead(flags_holdClick, BTN_1))
+    { //btn1
+      if(!isMainOpt)
+      {
+        if(mainOption == FACE_ID)
+        {
+          if(staticSpriteNr == SPRITE_COLORFUL_CAT)
+            isHappy = true;
+        }
+      }
+    }
+    else
+    {
+      if(!isMainOpt)
+      {
+        if(mainOption == FACE_ID)
+        {
+          if(staticSpriteNr == SPRITE_COLORFUL_CAT)
+            isHappy = false;
+        }
+      }
+    }
+
     if(bitRead(flags_oneClick, BTN_2))
     { //btn2 wylacza aplikacje
       if(!isMainOpt && (mainOption >= MIN_OPTION && mainOption <= MAX_OPTION))
@@ -829,8 +955,7 @@
     if(refresh && isMainOpt)
     {
       pixels.clear();
-      for(int i = 0; i < 3; i++)
-        colorSingle(i + COLUMNS * mainOption, colors[mainOption + 1], 100);
+      colorHEX(menuSprites[mainOption], colors[mainOption + 1], 30, colors[0], 2);
       refresh = false;
     }
 
@@ -840,6 +965,8 @@
       {
       if(staticSpriteNr == SPRITE_ANIMATED_EYES)
         blinkingEyes(option + 1);
+      else if (staticSpriteNr == SPRITE_COLORFUL_CAT)
+        colorfulCat();
       else
         staticSprite();
       }
