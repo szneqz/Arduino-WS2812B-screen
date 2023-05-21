@@ -174,6 +174,7 @@
 
       //dla Tetris game
         //snakeSgt ma dzialac nie na X i Y tylko podawac kolory liczbowo (zrobic nowa tablice???)
+        //albo wez kolorki z int colors[16][3] i po prostu te numery :3
         int block_delay = 20; //20 okresów po 50 milisekund czyli 1 sekunda
       //
 
