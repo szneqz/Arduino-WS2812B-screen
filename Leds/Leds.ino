@@ -148,7 +148,7 @@
       //
 
       //dla Sanke game
-        int snakeSgt[DIODE_COUNT][2]; //wspolne dla arkanoid
+        int snakeSgt[DIODE_COUNT][2]; //wspolne dla snake, arkanoid, tetris
         int head = 0;
         int tail_len = 3;
         int snake_dir = 0;  //0 - right, 1 - down, 2 - left, 3 - up
@@ -173,9 +173,29 @@
       //
 
       //dla Tetris game
-        //snakeSgt ma dzialac nie na X i Y tylko podawac kolory liczbowo (zrobic nowa tablice???)
-        //albo wez kolorki z int colors[16][3] i po prostu te numery :3
+        int figurePosX = 0;
+        int figurePosY = 0;
+        const int figurePosXStart = 3;
+        int figureRot = 0; //4 rotacje
+        const int figureMaxRot = 4;
+        int tetris_colors[10] = {1, 2, 3, 5, 7, 8, 9, 10, 13, 15};
+        int figures[7][4][4] = {
+        {{1, 5, 9, 13}, {4, 5, 6, 7}, {1, 5, 9, 13}, {4, 5, 6, 7}},   // linia
+        {{4, 5, 9, 10}, {2, 6, 5, 9}, {4, 5, 9, 10}, {2, 6, 5, 9}},   // Z
+        {{6, 7, 9, 10}, {1, 5, 6, 10}, {6, 7, 9, 10}, {1, 5, 6, 10}}, // Z odwrotne
+        {{1, 2, 5, 9}, {0, 4, 5, 6}, {1, 5, 9, 8}, {4, 5, 6, 10}},    // L odwrotne
+        {{1, 2, 6, 10}, {5, 6, 7, 9}, {2, 6, 10, 11}, {3, 5, 6, 7}},  // L
+        {{1, 4, 5, 6}, {1, 4, 5, 9}, {4, 5, 6, 9}, {1, 5, 6, 9}},     // |-
+        {{1, 2, 5, 6}, {1, 2, 5, 6}, {1, 2, 5, 6}, {1, 2, 5, 6}}      // kwadrat
+        };
+        int actualFigure = 0;
+        int actualFigureColor = 0;
+        bool randomizeFigure = false;  //czy wylosowac nowy blok
+        const int tetris_game_width = 10; //standardowa rozgrywka
+        int tetris_mode = 0;  //-1 dead, 0 static, 1 playing
         int block_delay = 20; //20 okresów po 50 milisekund czyli 1 sekunda
+        const int movement_block_delay = 20;
+        const int wholeLine_block_delay = 60;
       //
 
       //dla ogolnego menu
@@ -766,10 +786,68 @@
     {
       for(int i = 0; i < DIODE_COUNT; i++)
         snakeSgt[i][0] = 0;
+      
+      randomizeFigure = true;
+      tetris_mode = 0;
+
+      for(int i = 0; i < ROWS; i++) //pionowa biala kreska oddzielajaca gre
+        colorSingle(i * COLUMNS + tetris_game_width, colors[7], 100);
     }
 
     void tetrisGame()
     {
+      if(randomizeFigure)
+      {
+        actualFigure = random(0,7);
+        actualFigureColor = random(0,10);
+        figurePosX = figurePosXStart;
+        figurePosY = 0;
+        figureRot = 0;
+        randomizeFigure = false;
+        block_delay = movement_block_delay * 2; //na poczatku niech ma 2 sekundy czekanka
+      }
+
+      if(block_delay > 0)
+        block_delay--;
+
+      if(block_delay <= 0 && tetris_mode == 1)
+      {
+          for(int i = 0; i < 4; i++)
+          {
+            int figureBlockPos = (figurePosY + (figures[actualFigure][figureRot][i] / 4)) * COLUMNS + figurePosX + (figures[actualFigure][figureRot][i] % 4);
+            if(figureBlockPos + COLUMNS > DIODE_COUNT)  //jezeli blok nizej to juz wyjechanie za mape
+            {
+              randomizeFigure = true;
+              break;
+            }
+
+            if(snakeSgt[figureBlockPos + COLUMNS][0] != 0) //jezeli blok nizej zawiera juz inny blok
+            {
+              randomizeFigure = true;
+              break;
+            }
+          }
+
+        if(randomizeFigure)
+        {
+          figurePosY++; //ruch bloku w dol
+          block_delay = movement_block_delay;
+        }
+        else
+        { //jezeli nie moze sie ruszyc to zapisz informacje o kolorze na tablicy
+          randomizeFigure = true;
+          for(int i = 0; i < 4; i++)
+          {
+            int figureBlockPos = (figurePosY + (figures[actualFigure][figureRot][i] / 4)) * COLUMNS + figurePosX + (figures[actualFigure][figureRot][i] % 4);
+            snakeSgt[figureBlockPos][0] = actualFigureColor;
+          }
+        }
+      }
+      //TODO:
+      //sterowanie lewo prawo teraz wykrywa krawedzie kwadratu 4x4 wiec zle steruje, sprawdzaj czy dojezdazm blokiem do sciany! (moze zmienna mowiaca o kierunku)
+      //rysuj figury w trakcie ruchu!
+      //dodaj obracanie figur!
+      //testuj gre :3
       delay(50);
     }
      
@@ -831,6 +909,13 @@
             palettePos--;
           if(arkanoid_mode == 0 && respawn_time <= 0)
             arkanoid_mode = 1;
+        }
+        if(mainOption == TETRIS_ID)
+        {
+          if(figurePosX > 0 && tetris_mode != -1)
+            figurePosX--;
+          if(tetris_mode == 0)
+            tetris_mode = 1;
         }
       }
     }
@@ -895,6 +980,13 @@
             palettePos++;
           if(arkanoid_mode == 0 && respawn_time <= 0)
             arkanoid_mode = 1;
+        }
+        if(mainOption == TETRIS_ID)
+        {
+          if(figurePosX < (tetris_game_width - 4) && tetris_mode != -1)
+            figurePosX++;
+          if(tetris_mode == 0)
+            tetris_mode = 1;
         }
       }
     }
