@@ -29,7 +29,7 @@
     #define SPRITE_COLORFUL_CAT 1
     #define MAX_SPRITE_NR 7
 
-    //drawLines
+    //DrawLines
     #define LINES_AMOUNT 10
 
     byte sprites[4][30] = {
@@ -139,7 +139,7 @@
       bool isHappy = false;
       //
 
-      //dla drawLines
+      //dla DrawLines
         int act[LINES_AMOUNT][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
         int dest[LINES_AMOUNT][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
         int colorNr[LINES_AMOUNT] = {1, 2, 3, 5, 7, 8, 9, 10, 13, 15};
@@ -214,7 +214,7 @@
                         {51, 102, 102}, {102, 51, 102}, {102, 102, 51}, {0, 85, 170}, {0, 170, 85}, {85, 170, 0}, {170, 85, 0}, {170, 0, 85}};
     int colorsRGB[3] = {1, 3, 5};
 
-    void colorSingleAdd(int nr, int *color, int sat)
+    void ColorSingleAdd(int nr, int *color, int sat)
     {
       int tmp = ((nr / COLUMNS) % 2 == 0) ? ((DIODE_COUNT - 1) - nr) : ((DIODE_COUNT - 1) - COLUMNS * (nr / COLUMNS) - (COLUMNS - 1) + nr % COLUMNS);
 
@@ -231,13 +231,13 @@
       pixels.setPixelColor(tmp, constrain(*(color) * sat / 100 + gColors[2], 0, 255), constrain(*(color + 1) * sat / 100 + gColors[1], 0, 255), constrain(*(color + 2) * sat / 100 + gColors[0], 0, 255));
     }
 
-    void colorSingle(int nr, int *color, int sat)
+    void ColorSingle(int nr, int *color, int sat)
     {
       int tmp = ((nr / COLUMNS) % 2 == 0) ? ((DIODE_COUNT - 1) - nr) : ((DIODE_COUNT - 1) - COLUMNS * (nr / COLUMNS) - (COLUMNS - 1) + nr % COLUMNS);
       pixels.setPixelColor(tmp, *(color) * sat / 100, *(color + 1) * sat / 100, *(color + 2) * sat / 100);
     }
 
-    void colorHEX(byte *sprite, int *color, int sat, int *bgColor, int bgSat, bool useBg = true)
+    void ColorHEX(byte *sprite, int *color, int sat, int *bgColor, int bgSat, bool useBg = true)
     {
       for(int i = 0; i < DIODE_COUNT; i++)
       {
@@ -251,18 +251,18 @@
       }
     }
 
-    float fract(float x) { return x - int(x); }
+    float Fract(float x) { return x - int(x); }
 
-    float mix(float a, float b, float t) { return a + (b - a) * t; }
+    float Mix(float a, float b, float t) { return a + (b - a) * t; }
 
-    void hsv2rgb(float h, float s, float v, int* rgb) 
+    void HSVtoRGB(float h, float s, float v, int* rgb) 
     {
-      rgb[0] = v * mix(1.0, constrain(abs(fract(h + 1.0) * 6.0 - 3.0) - 1.0, 0.0, 1.0), s) * 255;
-      rgb[1] = v * mix(1.0, constrain(abs(fract(h + 0.6666666) * 6.0 - 3.0) - 1.0, 0.0, 1.0), s) * 255;
-      rgb[2] = v * mix(1.0, constrain(abs(fract(h + 0.3333333) * 6.0 - 3.0) - 1.0, 0.0, 1.0), s) * 255;
+      rgb[0] = v * Mix(1.0, constrain(abs(Fract(h + 1.0) * 6.0 - 3.0) - 1.0, 0.0, 1.0), s) * 255;
+      rgb[1] = v * Mix(1.0, constrain(abs(Fract(h + 0.6666666) * 6.0 - 3.0) - 1.0, 0.0, 1.0), s) * 255;
+      rgb[2] = v * Mix(1.0, constrain(abs(Fract(h + 0.3333333) * 6.0 - 3.0) - 1.0, 0.0, 1.0), s) * 255;
     }
 
-    void blinkingEyes(int nrColor)
+    void BlinkingEyes(int nrColor)
     { //mrugam oczkami z losowa czestotliwoscia
       if(actDelay <= 0)
       {
@@ -279,14 +279,14 @@
 
       if(refresh)
       {
-      colorHEX(sprites[spriteNr], colors[nrColor], 50, colors[0], 2);
+      ColorHEX(sprites[spriteNr], colors[nrColor], 50, colors[0], 2);
       refresh = false;
       }
       delay(20);
       actDelay -= 20;
     }
 
-    void colorfulCat()
+    void ColorfulCat()
     {
       if(refresh)
       {
@@ -299,9 +299,9 @@
         if(actDelay <= 0 && !isHappy)
           blinkOffset = 4;
 
-        colorHEX(colorfulCatSprite[0 + offset], colors[option + 1], 30, colors[0], 2);
-        colorHEX(colorfulCatSprite[1 + offset], colors[option + 5], 30, colors[0], 2, false);
-        colorHEX(colorfulCatSprite[2 + offset + blinkOffset], colors[option + 9], 30, colors[0], 2, false);
+        ColorHEX(colorfulCatSprite[0 + offset], colors[option + 1], 30, colors[0], 2);
+        ColorHEX(colorfulCatSprite[1 + offset], colors[option + 5], 30, colors[0], 2, false);
+        ColorHEX(colorfulCatSprite[2 + offset + blinkOffset], colors[option + 9], 30, colors[0], 2, false);
         refresh = false;
       }
 
@@ -319,18 +319,18 @@
       delay(20);
     }
 
-    void staticSprite()
+    void StaticSprite()
     {
       int actSprite = staticSpriteNr - 2; //-2 bo są dwa niestatyczne obrazy
       if(refresh)
       {
-        colorHEX(staticSprites[actSprite], colors[option + 1], 30, colors[0], 2);
+        ColorHEX(staticSprites[actSprite], colors[option + 1], 30, colors[0], 2);
         refresh = false;
       }
       delay(20);
     }
 
-    void drawLines()
+    void DrawLines()
     { 
       for(int i = 0; i < LINES_AMOUNT; i++)
       {
@@ -392,7 +392,7 @@
             act[i][1] = act[i][1] - 1;
         }
         
-        colorSingleAdd(act[i][1] * COLUMNS + act[i][0], colors[colorNr[i]], 100);
+        ColorSingleAdd(act[i][1] * COLUMNS + act[i][0], colors[colorNr[i]], 100);
       }
 
         for(int j = 0; j < DIODE_COUNT; j++)
@@ -412,7 +412,7 @@
       delay(20);
     }
 
-    void spawn_fruit()
+    void SpawnFruit()
     {
       bool isGood = true;
 
@@ -434,7 +434,7 @@
       }while(isGood == false);
     }
 
-    void reset_snake()
+    void ResetSnake()
     {
         snakeSgt[0][0] = (int)(COLUMNS / 2);
         snakeSgt[0][1] = (int)(ROWS / 2);
@@ -445,19 +445,19 @@
         head = 0;
         tail_len = 3;
         snake_dir = 0;  //0 - right, 1 - down, 2 - left, 3 - up
-        colorSingle(fruit_pos[1] * COLUMNS + fruit_pos[0], colors[0], 100); //zamaluj poprzedniego
-        spawn_fruit();
+        ColorSingle(fruit_pos[1] * COLUMNS + fruit_pos[0], colors[0], 100); //zamaluj poprzedniego
+        SpawnFruit();
         snake_mode = 0; //set static
         snake_delay = 30;
         snake_visible = true;
 
       for(int i = 0; i < tail_len; i++)
-        colorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[1], 100);
+        ColorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[1], 100);
         
       delay(100);
     }
 
-    void snakeGame()
+    void SnakeGame()
     {
       if(snake_mode == 1)
       {
@@ -504,23 +504,23 @@
         for(int i = 0; i < tail_len; i++)
         { //maluj weza
           int tmpColor[3];
-          hsv2rgb((float) i / tail_len, 1, 1, tmpColor);
-          colorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], tmpColor, 50);
+          HSVtoRGB((float) i / tail_len, 1, 1, tmpColor);
+          ColorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], tmpColor, 50);
         }
       }
       else
       {
         for(int i = 0; i < tail_len; i++) //usuwaj weza
-          colorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[0], 100);
+          ColorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[0], 100);
       }
 
-      colorSingle(fruit_pos[1] * COLUMNS + fruit_pos[0], colors[7], 100);
+      ColorSingle(fruit_pos[1] * COLUMNS + fruit_pos[0], colors[7], 100);
       
         //zdobywanie punktu
         if(snakeSgt[head][0] == fruit_pos[0] && snakeSgt[head][1] == fruit_pos[1])
         {
           tail_len++;
-          spawn_fruit();
+          SpawnFruit();
   
           for(int i = tail_len; i > head; i--)
           {
@@ -547,7 +547,7 @@
         }
       
         delay(100);
-        colorSingle(prevTail[1] * COLUMNS + prevTail[0], colors[0], 100); //zamaluj za ogonem (oszczednosc obliczen :3)
+        ColorSingle(prevTail[1] * COLUMNS + prevTail[0], colors[0], 100); //zamaluj za ogonem (oszczednosc obliczen :3)
       }
       else
       {
@@ -556,42 +556,42 @@
           for(int i = 0; i < tail_len; i++)
           { //maluj weza
             int tmpColor[3];
-            hsv2rgb((float) i / tail_len, 1, 1, tmpColor);
-            colorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], tmpColor, 50);
+            HSVtoRGB((float) i / tail_len, 1, 1, tmpColor);
+            ColorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], tmpColor, 50);
           }
         }
         else
         {
           for(int i = 0; i < tail_len; i++) //usuwaj weza
-            colorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[0], 100);
+            ColorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[0], 100);
         }
         if(snake_mode == -1)
         {
           snake_visible = !snake_visible;
           snake_delay--;
           if(snake_delay <= 0)
-            reset_snake();
+            ResetSnake();
         }
           
         delay(100);
       }
     }
 
-    void normalize(float pos[2])
+    void Normalize(float pos[2])
     {
       float magnitude = sqrt(pow(pos[0], 2) + pow(pos[1], 2));
       pos[0] /= magnitude;
       pos[1] /= magnitude;
     }
 
-    float myTan(float oppositeAngle, float nextToAngle)
+    float MyTan(float oppositeAngle, float nextToAngle)
     {
       return oppositeAngle / nextToAngle;
     }
 
-    void check45degAngle(float sidesLength[2])
+    void Check45DegAngle(float sidesLength[2])
     {
-      float tangens = myTan(sidesLength[1], abs(sidesLength[0]));
+      float tangens = MyTan(sidesLength[1], abs(sidesLength[0]));
       if(tangens > -1.0f)
       {
         if(sidesLength[0] < 0.0f)
@@ -602,15 +602,15 @@
       }
       else
       {
-        normalize(sidesLength);
+        Normalize(sidesLength);
       }
     }
 
-    void reset_arkanoid_ball()
+    void ResetArkanoidBall()
     {
       //usuwanie poprzedniej paletki
       for(int i = 0; i < paletteSize; i++)
-        colorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[0], 100);
+        ColorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[0], 100);
 
       palettePos = palettePosOnStart;
       respawn_time = 0;
@@ -619,7 +619,7 @@
 
       ballDirection[0] = (float)random(-100, 101) / 100.0f;
       ballDirection[1] = (float)random(-100, 1) / 100.0f;
-      check45degAngle(ballDirection);
+      Check45DegAngle(ballDirection);
 
       if(arkanoid_lives > 0)
         arkanoid_mode = 0;
@@ -627,11 +627,11 @@
         arkanoid_mode = -1;
     }
 
-    void reset_arkanoid()
+    void ResetArkanoid()
     {
       arkanoid_lives = paletteSize;
 
-      reset_arkanoid_ball();
+      ResetArkanoidBall();
 
       for(int i = 0; i < DIODE_COUNT; i++)
         snakeSgt[i][0] = 0;
@@ -649,36 +649,36 @@
           snakeSgt[j * COLUMNS + i][0] = 3;
     }
 
-    void arkanoidGame()
+    void ArkanoidGame()
     {
       //poruszanie paletki
       for(int i = 0; i < paletteSize; i++)
       {
         if(i < arkanoid_lives)
-          colorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[3], 100);
+          ColorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[3], 100);
         else
-          colorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[5], 100);
+          ColorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[5], 100);
       }
 
       if(palettePos > 0)
-        colorSingle((ROWS - 1) * COLUMNS + palettePos - 1, colors[0], 100);
+        ColorSingle((ROWS - 1) * COLUMNS + palettePos - 1, colors[0], 100);
 
       if(palettePos < maxPalettePos)
-        colorSingle((ROWS - 1) * COLUMNS + palettePos + paletteSize, colors[0], 100);
+        ColorSingle((ROWS - 1) * COLUMNS + palettePos + paletteSize, colors[0], 100);
       //______________________
 
       //elementy zniszczalne
       for(int i = 0; i < DIODE_COUNT; i++)
       {
         if(snakeSgt[i][0] > 0)
-          colorSingle(i, colors[colorsRGB[snakeSgt[i][0] - 1]], 25);
+          ColorSingle(i, colors[colorsRGB[snakeSgt[i][0] - 1]], 25);
       }
       //______________________
 
       //poruszanie pileczki
       int actPosition = (int)(ballPosition[1] + 0.5f) * COLUMNS + (int)(ballPosition[0] + 0.5f);
       int nextPosition = (int)(ballPosition[1] + ballDirection[1] * ballSpeed + 0.5f) * COLUMNS + (int)(ballPosition[0] + ballDirection[0] * ballSpeed + 0.5f);
-      colorSingle(actPosition, colors[0], 100); //zamalowywanie poprzedniej
+      ColorSingle(actPosition, colors[0], 100); //zamalowywanie poprzedniej
 
       if(snakeSgt[nextPosition][0] == 0 && arkanoid_mode == 1)
       { //czy nie najeżdżam na statyczny obiekt po odbiciu
@@ -700,7 +700,7 @@
       if(ballPosition[1] >= (ROWS - 1))
       {
         arkanoid_lives--;
-        reset_arkanoid_ball();
+        ResetArkanoidBall();
         respawn_time = max_respawn_time;
         return;
       }
@@ -712,7 +712,7 @@
       if(snakeSgt[bounce][0] > 0 && ballDirection[0] > 0)
       { //prawo odbicie
         snakeSgt[bounce][0]--;
-        colorSingle(bounce, colors[0], 100);
+        ColorSingle(bounce, colors[0], 100);
         ballDirection[0] = -ballDirection[0];
       }
       else
@@ -721,7 +721,7 @@
         if(snakeSgt[bounce][0] > 0 && ballDirection[0] < 0)
         { //lewo odbicie
           snakeSgt[bounce][0]--;
-          colorSingle(bounce, colors[0], 100);
+          ColorSingle(bounce, colors[0], 100);
           ballDirection[0] = -ballDirection[0];
         }
         else 
@@ -730,7 +730,7 @@
           if(snakeSgt[bounce][0] > 0 && ballDirection[1] > 0)
           { //dół odbicie
             snakeSgt[bounce][0]--;
-            colorSingle(bounce, colors[0], 100);
+            ColorSingle(bounce, colors[0], 100);
             ballDirection[1] = -ballDirection[1];
           }
           else 
@@ -739,7 +739,7 @@
             if(snakeSgt[bounce][0] > 0 && ballDirection[1] < 0)
             { //góra odbicie
               snakeSgt[bounce][0]--;
-              colorSingle(bounce, colors[0], 100);
+              ColorSingle(bounce, colors[0], 100);
               ballDirection[1] = -ballDirection[1];
             }
             else
@@ -749,7 +749,7 @@
               if(snakeSgt[nextPosition][0] > 0)
               {
               snakeSgt[nextPosition][0]--;
-              colorSingle(nextPosition, colors[0], 100);
+              ColorSingle(nextPosition, colors[0], 100);
               ballDirection[0] = -ballDirection[0];
               ballDirection[1] = -ballDirection[1];
               }
@@ -768,12 +768,12 @@
             ballDirection[1] = -ballDirection[1];
             float center = palettePos + (paletteSize - 1) / 2;
             ballDirection[0] += (ballPosition[0] - center) * 0.5f;
-            check45degAngle(ballDirection);
+            Check45DegAngle(ballDirection);
           }
         }
       }
 
-      colorSingle(actPosition, colors[14], 100);
+      ColorSingle(actPosition, colors[14], 100);
       //______________________
       
       if(respawn_time > 0)
@@ -782,7 +782,7 @@
       delay(50);
     }
 
-    void reset_tetris()
+    void ResetTetris()
     {
       for(int i = 0; i < DIODE_COUNT; i++)
         snakeSgt[i][0] = 0;
@@ -791,10 +791,64 @@
       tetris_mode = 0;
 
       for(int i = 0; i < ROWS; i++) //pionowa biala kreska oddzielajaca gre
-        colorSingle(i * COLUMNS + tetris_game_width, colors[7], 100);
+        ColorSingle(i * COLUMNS + tetris_game_width, colors[7], 100);
     }
 
-    void tetrisGame()
+    int GetFigureBlockPos(int i, int myFigPosX = -1, int myFigPosY = -1)
+    {
+      if(myFigPosX == -1) myFigPosX = figurePosX;
+      if(myFigPosY == -1) myFigPosY = figurePosY;
+      return (myFigPosY + (figures[actualFigure][figureRot][i] / 4)) * COLUMNS + myFigPosX + (figures[actualFigure][figureRot][i] % 4);
+    } 
+
+    void DrawFigure(int lastPosX, int lastPosY, int lastRot = -1)
+    {
+      if(lastRot == -1)
+        lastRot = figureRot;
+
+      for(int i = 0; i < 4; i++)
+      {
+        int figureBlockPos = GetFigureBlockPos(i, lastPosX, lastPosY);
+        ColorSingle(figureBlockPos, colors[0], 100);
+      }
+
+      for(int i = 0; i < 4; i++)
+      {
+        int figureBlockPos = GetFigureBlockPos(i, figurePosX, figurePosY);
+        ColorSingle(figureBlockPos, colors[actualFigureColor], 100);
+      }
+    }
+
+    void RotateTetrisFigure()
+    {
+
+    }
+
+    void MoveTetrisLeftRight(int dir)
+    {
+      if(tetris_mode == 1)
+      {
+        bool canMove = true;
+
+        for(int i = 0; i < 4; i++)
+        {
+          int figureBlockPos = GetFigureBlockPos(i);
+          if((figureBlockPos % COLUMNS) + dir < 0 || (figureBlockPos % COLUMNS) + dir >= tetris_game_width || snakeSgt[figureBlockPos + dir][0] != 0)
+          { //jezeli blok w bok to juz wyjechanie za mape lub blok w bok zawiera juz inny blok
+            canMove = false;
+            break;
+          }
+        }
+
+        if(canMove)
+        {
+          figurePosX += dir;
+          DrawFigure(figurePosX - dir, figurePosY);
+        }
+      }
+    }
+
+    void TetrisGame()
     {
       if(randomizeFigure)
       {
@@ -814,23 +868,18 @@
       {
           for(int i = 0; i < 4; i++)
           {
-            int figureBlockPos = (figurePosY + (figures[actualFigure][figureRot][i] / 4)) * COLUMNS + figurePosX + (figures[actualFigure][figureRot][i] % 4);
-            if(figureBlockPos + COLUMNS > DIODE_COUNT)  //jezeli blok nizej to juz wyjechanie za mape
-            {
-              randomizeFigure = true;
-              break;
-            }
-
-            if(snakeSgt[figureBlockPos + COLUMNS][0] != 0) //jezeli blok nizej zawiera juz inny blok
-            {
+            int figureBlockPos = GetFigureBlockPos(i);
+            if(figureBlockPos + COLUMNS > DIODE_COUNT || snakeSgt[figureBlockPos + COLUMNS][0] != 0) 
+            { //jezeli blok nizej to juz wyjechanie za mape lub blok nizej zawiera juz inny blok
               randomizeFigure = true;
               break;
             }
           }
 
-        if(randomizeFigure)
+        if(!randomizeFigure)
         {
           figurePosY++; //ruch bloku w dol
+          DrawFigure(figurePosX, figurePosY - 1);
           block_delay = movement_block_delay;
         }
         else
@@ -844,9 +893,8 @@
         }
       }
       //TODO:
-      //sterowanie lewo prawo teraz wykrywa krawedzie kwadratu 4x4 wiec zle steruje, sprawdzaj czy dojezdazm blokiem do sciany! (moze zmienna mowiaca o kierunku)
-      //rysuj figury w trakcie ruchu!
       //dodaj obracanie figur!
+      //przyspieszanie w dol
       //testuj gre :3
       delay(50);
     }
@@ -889,7 +937,7 @@
           option = 4;
         }
         if(mainOption == SNAKE_ID)
-        { //snakeGame
+        { //SnakeGame
           if(snake_dir != 0 && snake_mode == 1)
             snake_dir = 2;
           if(snake_mode == 0)
@@ -913,7 +961,7 @@
         if(mainOption == TETRIS_ID)
         {
           if(figurePosX > 0 && tetris_mode != -1)
-            figurePosX--;
+            MoveTetrisLeftRight(-1);
           if(tetris_mode == 0)
             tetris_mode = 1;
         }
@@ -939,11 +987,16 @@
         }
 
         if(mainOption == SNAKE_ID)
-        { //snakeGame
+        { //SnakeGame
           if(snake_dir != 1  && snake_mode == 1)
             snake_dir = 3;
           if(snake_mode == 0)
             snake_mode = 1;
+        }
+
+        if(mainOption == TETRIS_ID)
+        {
+          RotateTetrisFigure();
         }
       }
       bitClear(flags_oneClick, BTN_UP);
@@ -960,7 +1013,7 @@
           option = 0;
         }
         if(mainOption == SNAKE_ID)
-        { //snakeGame
+        { //SnakeGame
           if(snake_dir != 2 && snake_mode == 1)
             snake_dir = 0;
           if(snake_mode == 0)
@@ -984,7 +1037,7 @@
         if(mainOption == TETRIS_ID)
         {
           if(figurePosX < (tetris_game_width - 4) && tetris_mode != -1)
-            figurePosX++;
+            MoveTetrisLeftRight(1);
           if(tetris_mode == 0)
             tetris_mode = 1;
         }
@@ -1009,7 +1062,7 @@
             staticSpriteNr = 0;
         }
         if(mainOption == SNAKE_ID)
-        { //snakeGame
+        { //SnakeGame
           if(snake_dir != 3 && snake_mode == 1)
             snake_dir = 1;
           if(snake_mode == 0)
@@ -1028,13 +1081,13 @@
         pixels.clear();
         
         if(mainOption == SNAKE_ID)
-          reset_snake();
+          ResetSnake();
         
         if(mainOption == ARKANOID_ID)
-          reset_arkanoid();
+          ResetArkanoid();
 
         if(mainOption == TETRIS_ID)
-          reset_tetris();
+          ResetTetris();
       }
       bitClear(flags_oneClick, BTN_1);
     }
@@ -1072,7 +1125,7 @@
     if(refresh && isMainOpt)
     {
       pixels.clear();
-      colorHEX(menuSprites[mainOption], colors[mainOption + 1], 30, colors[0], 2);
+      ColorHEX(menuSprites[mainOption], colors[mainOption + 1], 30, colors[0], 2);
       refresh = false;
     }
 
@@ -1081,24 +1134,24 @@
       if(mainOption == FACE_ID)
       {
       if(staticSpriteNr == SPRITE_ANIMATED_EYES)
-        blinkingEyes(option + 1);
+        BlinkingEyes(option + 1);
       else if (staticSpriteNr == SPRITE_COLORFUL_CAT)
-        colorfulCat();
+        ColorfulCat();
       else
-        staticSprite();
+        StaticSprite();
       }
 
       if(mainOption == LINES_ID)
-        drawLines();
+        DrawLines();
 
       if(mainOption == SNAKE_ID)
-        snakeGame();
+        SnakeGame();
 
       if(mainOption == ARKANOID_ID)
-        arkanoidGame();
+        ArkanoidGame();
 
       if(mainOption == TETRIS_ID)
-        tetrisGame();
+        TetrisGame();
     }
 
     pixels.show();
