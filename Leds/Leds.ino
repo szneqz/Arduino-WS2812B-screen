@@ -895,6 +895,7 @@
       //TODO:
       //dodaj obracanie figur!
       //przyspieszanie w dol
+      //jezeli mamy juz na spawnie zderzenie to koniec gry
       //testuj gre :3
       delay(50);
     }
