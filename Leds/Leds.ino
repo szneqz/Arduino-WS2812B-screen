@@ -180,13 +180,37 @@
         const int figureMaxRot = 4;
         int tetris_colors[10] = {1, 2, 3, 5, 7, 8, 9, 10, 13, 15};
         int figures[7][4][4] = {
-        {{1, 5, 9, 13}, {4, 5, 6, 7}, {1, 5, 9, 13}, {4, 5, 6, 7}},   // linia
-        {{4, 5, 9, 10}, {2, 6, 5, 9}, {4, 5, 9, 10}, {2, 6, 5, 9}},   // Z
-        {{6, 7, 9, 10}, {1, 5, 6, 10}, {6, 7, 9, 10}, {1, 5, 6, 10}}, // Z odwrotne
-        {{1, 2, 5, 9}, {0, 4, 5, 6}, {1, 5, 9, 8}, {4, 5, 6, 10}},    // L odwrotne
-        {{1, 2, 6, 10}, {5, 6, 7, 9}, {2, 6, 10, 11}, {3, 5, 6, 7}},  // L
-        {{1, 4, 5, 6}, {1, 4, 5, 9}, {4, 5, 6, 9}, {1, 5, 6, 9}},     // |-
+        {{4, 5, 6, 7}, {2, 6, 10, 14}, {8, 9, 10, 11}, {1, 5, 9, 13}},   // linia
+        {{0, 1, 5, 6}, {2, 5, 6, 9}, {4, 5, 9, 10}, {1, 4, 5, 8}},   // Z
+        {{1, 2, 4, 5}, {1, 5, 6, 10}, {5, 7, 8, 9}, {0, 4, 5, 9}}, // Z odwrotne
+        {{0, 4, 5, 6}, {1, 2, 5, 9}, {4, 5, 6, 10}, {1, 5, 8, 9}},    // J
+        {{2, 4, 5, 6}, {1, 5, 9, 10}, {4, 5, 6, 8}, {0, 1, 5, 9}},  // L
+        {{1, 4, 5, 6}, {1, 5, 6, 9}, {4, 5, 6, 9}, {1, 4, 5, 9}},     // |-
         {{1, 2, 5, 6}, {1, 2, 5, 6}, {1, 2, 5, 6}, {1, 2, 5, 6}}      // kwadrat
+        };
+        int regularWallKicksClockwise[4][5][2] = {
+          {{0, 0}, {-1, 0}, {-1, -1}, {0, 2}, {-1, 2}}, //0>>1
+          {{0, 0}, {1, 0}, {1, 1}, {0, -2}, {1, -2}},   //1>>2
+          {{0, 0}, {1, 0}, {1, -1}, {0, 2}, {1, 2}},    //2>>3
+          {{0, 0}, {-1, 0}, {-1, 1}, {0, -2}, {-1, -2}} //3>>0
+        };
+        int regularWallKicksCounterClockwise[4][5][2] = {
+          {{0, 0}, {1, 0}, {1, -1}, {0, 2}, {1, 2}},    //0>>3
+          {{0, 0}, {1, 0}, {1, 1}, {0, -2}, {1, -2}},   //1>>0
+          {{0, 0}, {-1, 0}, {-1, -1}, {0, 2}, {-1, 2}}, //2>>1
+          {{0, 0}, {-1, 0}, {-1, 1}, {0, -2}, {-1, -2}} //3>>2
+        };
+        int iWallKicksClockwise[4][5][2] {
+          {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}},  //0>>1
+          {{0, 0}, {-1, 0}, {2, 0}, {-1, -2}, {2, 1}},  //1>>2
+          {{0, 0}, {2, 0}, {-1, 0}, {2, -1}, {-1, 2}},  //2>>3
+          {{0, 0}, {1, 0}, {-2, 0}, {1, 2}, {-2, -1}}   //3>>0
+        };
+        int iWallKicksCounterClockwise[4][5][2] {
+          {{0, 0}, {-1, 0}, {2, 0}, {-1, -2}, {2, 1}},  //0>>3
+          {{0, 0}, {2, 0}, {-1, 0}, {2, -1}, {-1, 2}},  //1>>0
+          {{0, 0}, {1, 0}, {-2, 0}, {1, 2}, {-2, -1}},  //2>>1
+          {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}}   //3>>2
         };
         int actualFigure = 0;
         int actualFigureColor = 0;
@@ -794,11 +818,12 @@
         ColorSingle(i * COLUMNS + tetris_game_width, colors[7], 100);
     }
 
-    int GetFigureBlockPos(int i, int myFigPosX = -1, int myFigPosY = -1)
+    int GetFigureBlockPos(int i, int myFigPosX = -1, int myFigPosY = -1, int myFigRot = -1)
     {
       if(myFigPosX == -1) myFigPosX = figurePosX;
       if(myFigPosY == -1) myFigPosY = figurePosY;
-      return (myFigPosY + (figures[actualFigure][figureRot][i] / 4)) * COLUMNS + myFigPosX + (figures[actualFigure][figureRot][i] % 4);
+      if(myFigRot == -1) myFigRot = figureRot;
+      return (myFigPosY + (figures[actualFigure][myFigRot][i] / 4)) * COLUMNS + myFigPosX + (figures[actualFigure][myFigRot][i] % 4);
     } 
 
     void DrawFigure(int lastPosX, int lastPosY, int lastRot = -1)
@@ -819,9 +844,30 @@
       }
     }
 
-    void RotateTetrisFigure()
+    void RotateTetrisFigure(int dir)  //1 - clockwise  -1 - counter clockwise
     {
+      if(dir == 1)
+      {
+        if(actualFigure == 0) //jezeli linia
+        {
 
+        }
+        else
+        {
+
+        }
+      }
+      else
+      {
+        if(actualFigure == 0) //jezeli linia
+        {
+
+        }
+        else
+        {
+          
+        }
+      }
     }
 
     void MoveTetrisLeftRight(int dir)
