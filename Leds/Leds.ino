@@ -177,7 +177,6 @@
         int figurePosY = 0;
         const int figurePosXStart = 3;
         int figureRot = 0; //4 rotacje
-        const int figureMaxRot = 4;
         int tetris_colors[10] = {1, 2, 3, 5, 7, 8, 9, 10, 13, 15};
         int figures[7][4][4] = {
         {{4, 5, 6, 7}, {2, 6, 10, 14}, {8, 9, 10, 11}, {1, 5, 9, 13}},   // linia
@@ -188,6 +187,7 @@
         {{1, 4, 5, 6}, {1, 5, 6, 9}, {4, 5, 6, 9}, {1, 4, 5, 9}},     // |-
         {{1, 2, 5, 6}, {1, 2, 5, 6}, {1, 2, 5, 6}, {1, 2, 5, 6}}      // kwadrat
         };
+        const int wallKicksAmount = 5;
         int regularWallKicksClockwise[4][5][2] = {
           {{0, 0}, {-1, 0}, {-1, -1}, {0, 2}, {-1, 2}}, //0>>1
           {{0, 0}, {1, 0}, {1, 1}, {0, -2}, {1, -2}},   //1>>2
@@ -844,28 +844,97 @@
       }
     }
 
+    bool CheckFigurePossibility(int myFigPosX, int myFigPosY, int myFigRot)
+    {
+      for(int i = 0; i < 4; i++)
+      {
+        int figureBlockPos = GetFigureBlockPos(i, myFigPosX, myFigPosY, myFigRot);
+        if((figureBlockPos % COLUMNS) < 0 || (figureBlockPos % COLUMNS) >= tetris_game_width || (figureBlockPos / COLUMNS) >= ROWS || snakeSgt[figureBlockPos][0] != 0)
+        { //jezeli blok to juz wyjechanie za mape lub blok zawiera juz inny blok
+          return false;
+        }
+      }
+      return true;
+    }
+
     void RotateTetrisFigure(int dir)  //1 - clockwise  -1 - counter clockwise
     {
+      int newRot = figureRot + dir;
+      int newPosX = figurePosX;
+      int newPosY = figurePosY;
+      int lastRot = figureRot;
+      int lastPosX = figurePosX;
+      int lastPosY = figurePosY;
+
+      if(newRot > 3)
+        newRot = 0;
+      if(newRot < 0)
+        newRot = 3;
+
       if(dir == 1)
       {
         if(actualFigure == 0) //jezeli linia
         {
-
+          for(int i = 0; i < wallKicksAmount; i++)
+          {
+            newPosX = figurePosX + iWallKicksClockwise[figureRot][i][0];
+            newPosY = figurePosY + iWallKicksClockwise[figureRot][i][1];
+            if(CheckFigurePossibility(newPosX, newPosY, newRot))
+            {
+              figureRot = newRot;
+              figurePosX = newPosX;
+              figurePosY = newPosY;
+              DrawFigure(lastPosX, lastPosY, lastRot);
+            }
+          }
         }
         else
         {
-
+          for(int i = 0; i < wallKicksAmount; i++)
+          {
+            newPosX = figurePosX + regularWallKicksClockwise[figureRot][i][0];
+            newPosY = figurePosY + regularWallKicksClockwise[figureRot][i][1];
+            if(CheckFigurePossibility(newPosX, newPosY, newRot))
+            {
+              figureRot = newRot;
+              figurePosX = newPosX;
+              figurePosY = newPosY;
+              DrawFigure(lastPosX, lastPosY, lastRot);
+            }
+          }
         }
       }
       else
       {
         if(actualFigure == 0) //jezeli linia
         {
-
+          for(int i = 0; i < wallKicksAmount; i++)
+          {
+            newPosX = figurePosX + iWallKicksCounterClockwise[figureRot][i][0];
+            newPosY = figurePosY + iWallKicksCounterClockwise[figureRot][i][1];
+            if(CheckFigurePossibility(newPosX, newPosY, newRot))
+            {
+              figureRot = newRot;
+              figurePosX = newPosX;
+              figurePosY = newPosY;
+              DrawFigure(lastPosX, lastPosY, lastRot);
+            }
+          }
         }
         else
         {
-          
+          for(int i = 0; i < wallKicksAmount; i++)
+          {
+            newPosX = figurePosX + regularWallKicksCounterClockwise[figureRot][i][0];
+            newPosY = figurePosY + regularWallKicksCounterClockwise[figureRot][i][1];
+            if(CheckFigurePossibility(newPosX, newPosY, newRot))
+            {
+              figureRot = newRot;
+              figurePosX = newPosX;
+              figurePosY = newPosY;
+              DrawFigure(lastPosX, lastPosY, lastRot);
+            }
+          }
         }
       }
     }
@@ -905,6 +974,11 @@
         figureRot = 0;
         randomizeFigure = false;
         block_delay = movement_block_delay * 2; //na poczatku niech ma 2 sekundy czekanka
+
+        if(!CheckFigurePossibility(figurePosX, figurePosY, figureRot))
+        { //jezeli na spawnie juz jest w bloku to koniec gry
+          tetris_mode = -1;
+        }
       }
 
       if(block_delay > 0)
@@ -930,7 +1004,6 @@
         }
         else
         { //jezeli nie moze sie ruszyc to zapisz informacje o kolorze na tablicy
-          randomizeFigure = true;
           for(int i = 0; i < 4; i++)
           {
             int figureBlockPos = (figurePosY + (figures[actualFigure][figureRot][i] / 4)) * COLUMNS + figurePosX + (figures[actualFigure][figureRot][i] % 4);
@@ -939,9 +1012,7 @@
         }
       }
       //TODO:
-      //dodaj obracanie figur!
       //przyspieszanie w dol
-      //jezeli mamy juz na spawnie zderzenie to koniec gry
       //testuj gre :3
       delay(50);
     }
@@ -1040,11 +1111,6 @@
           if(snake_mode == 0)
             snake_mode = 1;
         }
-
-        if(mainOption == TETRIS_ID)
-        {
-          RotateTetrisFigure();
-        }
       }
       bitClear(flags_oneClick, BTN_UP);
     }
@@ -1136,6 +1202,13 @@
         if(mainOption == TETRIS_ID)
           ResetTetris();
       }
+      else
+      {
+        if(mainOption == TETRIS_ID)
+        { //lewy guziczek obraca przeciwnie do ruchu wskazowek zegara
+          RotateTetrisFigure(-1);
+        }
+      }
       bitClear(flags_oneClick, BTN_1);
     }
 
@@ -1163,10 +1236,21 @@
     }
 
     if(bitRead(flags_oneClick, BTN_2))
-    { //btn2 wylacza aplikacje
+    { //btn2
+      if(!isMainOpt)
+      {
+        if(mainOption == TETRIS_ID)
+        { //prawy guziczek obraca zgodnie z ruchem wskazowek zegara
+          RotateTetrisFigure(1);
+        }
+      }
+      bitClear(flags_oneClick, BTN_2);
+    }
+
+    if(bitRead(flags_holdClick, BTN_1) && bitRead(flags_holdClick, BTN_2) && bitRead(flags_holdClick, BTN_UP))
+    { //btn1, btn2 oraz btn_up przytrzymane na raz wylaczaja aplikacje
       if(!isMainOpt && (mainOption >= MIN_OPTION && mainOption <= MAX_OPTION))
         isMainOpt = true;
-      bitClear(flags_oneClick, BTN_2);
     }
 
     if(refresh && isMainOpt)
