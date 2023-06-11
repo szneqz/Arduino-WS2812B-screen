@@ -4,7 +4,7 @@
     #define DIODE_COUNT 234
     #define ROWS 13
     #define COLUMNS 18
-    #define MAX_OPTION 3
+    #define MAX_OPTION 4
     #define MIN_OPTION 0
 
     #define DEBOUNCE_TIME 50
@@ -177,11 +177,11 @@
         int figurePosY = 0;
         const int figurePosXStart = 3;
         int figureRot = 0; //4 rotacje
-        int tetris_colors[10] = {1, 2, 3, 5, 7, 8, 9, 10, 13, 15};
+        int tetris_colors[7] = {2, 5, 3, 1, 14, 6, 4};
         int figures[7][4][4] = {
         {{4, 5, 6, 7}, {2, 6, 10, 14}, {8, 9, 10, 11}, {1, 5, 9, 13}},   // linia
         {{0, 1, 5, 6}, {2, 5, 6, 9}, {4, 5, 9, 10}, {1, 4, 5, 8}},   // Z
-        {{1, 2, 4, 5}, {1, 5, 6, 10}, {5, 7, 8, 9}, {0, 4, 5, 9}}, // Z odwrotne
+        {{1, 2, 4, 5}, {1, 5, 6, 10}, {5, 6, 8, 9}, {0, 4, 5, 9}}, // Z odwrotne
         {{0, 4, 5, 6}, {1, 2, 5, 9}, {4, 5, 6, 10}, {1, 5, 8, 9}},    // J
         {{2, 4, 5, 6}, {1, 5, 9, 10}, {4, 5, 6, 8}, {0, 1, 5, 9}},  // L
         {{1, 4, 5, 6}, {1, 5, 6, 9}, {4, 5, 6, 9}, {1, 4, 5, 9}},     // |-
@@ -814,14 +814,14 @@
       randomizeFigure = true;
       tetris_mode = 0;
 
-      for(int i = 0; i < ROWS; i++) //pionowa biala kreska oddzielajaca gre
-        ColorSingle(i * COLUMNS + tetris_game_width, colors[7], 100);
+      for(int i = 0; i < ROWS; i++) //pionowa niebieska kreska oddzielajaca gre
+        ColorSingle(i * COLUMNS + tetris_game_width, colors[1], 100);
     }
 
-    int GetFigureBlockPos(int i, int myFigPosX = -1, int myFigPosY = -1, int myFigRot = -1)
+    int GetFigureBlockPos(int i, int myFigPosX = -10, int myFigPosY = -10, int myFigRot = -1)
     {
-      if(myFigPosX == -1) myFigPosX = figurePosX;
-      if(myFigPosY == -1) myFigPosY = figurePosY;
+      if(myFigPosX == -10) myFigPosX = figurePosX;
+      if(myFigPosY == -10) myFigPosY = figurePosY;
       if(myFigRot == -1) myFigRot = figureRot;
       return (myFigPosY + (figures[actualFigure][myFigRot][i] / 4)) * COLUMNS + myFigPosX + (figures[actualFigure][myFigRot][i] % 4);
     } 
@@ -833,14 +833,14 @@
 
       for(int i = 0; i < 4; i++)
       {
-        int figureBlockPos = GetFigureBlockPos(i, lastPosX, lastPosY);
+        int figureBlockPos = GetFigureBlockPos(i, lastPosX, lastPosY, lastRot);
         ColorSingle(figureBlockPos, colors[0], 100);
       }
 
       for(int i = 0; i < 4; i++)
       {
         int figureBlockPos = GetFigureBlockPos(i, figurePosX, figurePosY);
-        ColorSingle(figureBlockPos, colors[actualFigureColor], 100);
+        ColorSingle(figureBlockPos, colors[actualFigureColor], 20);
       }
     }
 
@@ -885,6 +885,7 @@
               figurePosX = newPosX;
               figurePosY = newPosY;
               DrawFigure(lastPosX, lastPosY, lastRot);
+              break;
             }
           }
         }
@@ -900,6 +901,7 @@
               figurePosX = newPosX;
               figurePosY = newPosY;
               DrawFigure(lastPosX, lastPosY, lastRot);
+              break;
             }
           }
         }
@@ -918,6 +920,7 @@
               figurePosX = newPosX;
               figurePosY = newPosY;
               DrawFigure(lastPosX, lastPosY, lastRot);
+              break;
             }
           }
         }
@@ -933,6 +936,7 @@
               figurePosX = newPosX;
               figurePosY = newPosY;
               DrawFigure(lastPosX, lastPosY, lastRot);
+              break;
             }
           }
         }
@@ -968,12 +972,14 @@
       if(randomizeFigure)
       {
         actualFigure = random(0,7);
-        actualFigureColor = random(0,10);
+        actualFigureColor = tetris_colors[actualFigure];
         figurePosX = figurePosXStart;
         figurePosY = 0;
         figureRot = 0;
         randomizeFigure = false;
-        block_delay = movement_block_delay * 2; //na poczatku niech ma 2 sekundy czekanka
+        block_delay = movement_block_delay;
+
+        DrawFigure(figurePosX, figurePosY);
 
         if(!CheckFigurePossibility(figurePosX, figurePosY, figureRot))
         { //jezeli na spawnie juz jest w bloku to koniec gry
@@ -1078,7 +1084,7 @@
         }
         if(mainOption == TETRIS_ID)
         {
-          if(figurePosX > 0 && tetris_mode != -1)
+          if(tetris_mode != -1)
             MoveTetrisLeftRight(-1);
           if(tetris_mode == 0)
             tetris_mode = 1;
@@ -1149,7 +1155,7 @@
         }
         if(mainOption == TETRIS_ID)
         {
-          if(figurePosX < (tetris_game_width - 4) && tetris_mode != -1)
+          if(tetris_mode != -1)
             MoveTetrisLeftRight(1);
           if(tetris_mode == 0)
             tetris_mode = 1;
@@ -1247,7 +1253,7 @@
       bitClear(flags_oneClick, BTN_2);
     }
 
-    if(bitRead(flags_holdClick, BTN_1) && bitRead(flags_holdClick, BTN_2) && bitRead(flags_holdClick, BTN_UP))
+    if(bitRead(flags_holdClick, BTN_2) && bitRead(flags_holdClick, BTN_LEFT) && bitRead(flags_holdClick, BTN_RIGHT))
     { //btn1, btn2 oraz btn_up przytrzymane na raz wylaczaja aplikacje
       if(!isMainOpt && (mainOption >= MIN_OPTION && mainOption <= MAX_OPTION))
         isMainOpt = true;
@@ -1347,5 +1353,5 @@
           bitClear(flags_holdClick, BTN_2);
       
       lastIntMillis = millis();
-      Serial.println(switches, BIN);
+      //Serial.println(switches, BIN);
     }
