@@ -99,10 +99,9 @@
       0b00000000, 0b00100000, 0b00000000, 0b10000000, 0b00000111, 0b00000000, 0b00000000, 0b00001000, 0b00000000, 0b00000000, 
       0b00000000, 0b00000000, 0b00000000, 0b11000000, 0b00000001, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000},
 
-      {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000100, 0b00000000, 0b00011000, 0b00001111, 
-      0b00100000, 0b00100000, 0b00000000, 0b10000000, 0b00000111, 0b00000000, 0b00000000, 0b00000100, 0b00000000, 0b10010011, 
-      0b00000001, 0b01111000, 0b00001111, 0b11110000, 0b00111111, 0b11000000, 0b10011111, 0b00000000, 0b11011110, 0b00000011}
-
+      {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000100, 0b10000000, 0b01011000, 0b00001111, 
+      0b00100111, 0b00100001, 0b00000000, 0b10001100, 0b11000111, 0b00000011, 0b00000000, 0b01000000, 0b00000000, 0b10001100, 
+      0b00000001, 0b01100000, 0b00000100, 0b00100000, 0b00000000, 0b10000000, 0b00110000, 0b00000000, 0b01100011, 0b00000000}
     };
 
     byte staticSprites[][30] = {
@@ -217,9 +216,12 @@
         bool randomizeFigure = false;  //czy wylosowac nowy blok
         const int tetris_game_width = 10; //standardowa rozgrywka
         int tetris_mode = 0;  //-1 dead, 0 static, 1 playing
-        int block_delay = 20; //20 okresów po 50 milisekund czyli 1 sekunda
+        const int fast_movement_block_delay = 1;
         const int movement_block_delay = 20;
-        const int wholeLine_block_delay = 60;
+        int actual_movement_block_delay = movement_block_delay;
+        int block_delay = movement_block_delay; //20 okresów po 50 milisekund czyli 1 sekunda
+        int start_block_delay = movement_block_delay;
+        int tetris_score = 0;
       //
 
       //dla ogolnego menu
@@ -813,6 +815,7 @@
       
       randomizeFigure = true;
       tetris_mode = 0;
+      tetris_score = 0;
 
       for(int i = 0; i < ROWS; i++) //pionowa niebieska kreska oddzielajaca gre
         ColorSingle(i * COLUMNS + tetris_game_width, colors[1], 100);
@@ -967,6 +970,48 @@
       }
     }
 
+    void CheckWholeLines(int minHeight, int maxHeight)
+    {
+      int iterations = minHeight - maxHeight + 1;
+      int actHeight = minHeight;
+
+      for(int i = 0; i < iterations; i++)
+      {
+        bool scorePoints = true;
+        for(int j = 0; j < tetris_game_width; j++)
+        {
+          if(snakeSgt[actHeight * COLUMNS + j][0] == 0)
+          {
+            scorePoints = false;
+            actHeight--;
+            break;
+          }
+        }
+
+        if(scorePoints)
+        {
+          for(int k = actHeight - 1; k >= 0; k--)
+          {
+            for(int l = 0; l < tetris_game_width; l++)
+            {
+              snakeSgt[(k + 1) * COLUMNS + l][0] = snakeSgt[k * COLUMNS + l][0];
+              ColorSingle((k + 1) * COLUMNS + l, colors[snakeSgt[k * COLUMNS + l][0]], 20);
+            }
+          }
+          if(tetris_score < ROWS)
+          {
+            ColorSingle((ROWS - 1 - tetris_score) * COLUMNS + tetris_game_width, colors[5], 100);
+          }
+          else
+          {
+            ColorSingle((ROWS - 1 - (tetris_score % ROWS)) * COLUMNS + tetris_game_width, colors[3], 100);
+          }
+          tetris_score++;
+        }
+      }
+      
+    }
+
     void TetrisGame()
     {
       if(randomizeFigure)
@@ -978,7 +1023,7 @@
         figureRot = 0;
         randomizeFigure = false;
         block_delay = movement_block_delay;
-
+        start_block_delay = movement_block_delay;
         DrawFigure(figurePosX, figurePosY);
 
         if(!CheckFigurePossibility(figurePosX, figurePosY, figureRot))
@@ -989,6 +1034,9 @@
 
       if(block_delay > 0)
         block_delay--;
+
+      if(start_block_delay > 0)
+        start_block_delay--;
 
       if(block_delay <= 0 && tetris_mode == 1)
       {
@@ -1006,20 +1054,29 @@
         {
           figurePosY++; //ruch bloku w dol
           DrawFigure(figurePosX, figurePosY - 1);
-          block_delay = movement_block_delay;
+          if(start_block_delay > 0)
+            block_delay = movement_block_delay;
+          else
+            block_delay = actual_movement_block_delay;
         }
         else
-        { //jezeli nie moze sie ruszyc to zapisz informacje o kolorze na tablicy
+        { //jezeli nie moze sie ruszyc to zapisz informacje o kolorze na tablicy i sprawdz czy sa pelne linie
+          int minHeight = 0;
+          int maxHeight = 0;
+
           for(int i = 0; i < 4; i++)
           {
             int figureBlockPos = (figurePosY + (figures[actualFigure][figureRot][i] / 4)) * COLUMNS + figurePosX + (figures[actualFigure][figureRot][i] % 4);
             snakeSgt[figureBlockPos][0] = actualFigureColor;
+
+            if(i == 0)
+              maxHeight = figureBlockPos / COLUMNS;
+            if(i == 3)
+              minHeight = figureBlockPos / COLUMNS;
           }
+          CheckWholeLines(minHeight, maxHeight);
         }
       }
-      //TODO:
-      //przyspieszanie w dol
-      //testuj gre :3
       delay(50);
     }
      
@@ -1189,6 +1246,24 @@
         }
       }
       bitClear(flags_oneClick, BTN_DOWN);
+    }
+
+    if(bitRead(flags_holdClick, BTN_DOWN))
+    {
+        if(mainOption == TETRIS_ID)
+        { //Jezeli klikne sobie przycisk w dol to od razu jade szybko w dol
+          if(block_delay > fast_movement_block_delay && start_block_delay <= 0)
+            block_delay = fast_movement_block_delay;
+
+          actual_movement_block_delay = fast_movement_block_delay;
+        }
+    }
+    else
+    {
+      if(mainOption == TETRIS_ID)
+        { //Jezeli puszcze sobie przycisk w dol to zwalniam
+          actual_movement_block_delay = movement_block_delay;
+        }
     }
 
     if(bitRead(flags_oneClick, BTN_1))
