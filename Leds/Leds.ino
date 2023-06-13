@@ -146,6 +146,13 @@
         int dir[LINES_AMOUNT] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
       //
 
+      //dla Glitcha
+        uint32_t glitchBuffer[DIODE_COUNT];
+        int maxGlitchDelay = 80;
+        int minGlitchDelay = 25;
+        int glitchDelay = 50;
+      //
+
       //dla Sanke game
         int snakeSgt[DIODE_COUNT][2]; //wspolne dla snake, arkanoid, tetris
         int head = 0;
@@ -355,6 +362,73 @@
         refresh = false;
       }
       delay(20);
+    }
+
+    void GlitchEverything(int movX, int movY, int addColorValue)
+    {
+      if(glitchDelay <= 0)
+      {
+        for(int times = 0; times < 2; times++)
+        {
+          movX = random(-2, 3);
+          movY = random(-2, 3);
+
+          for(int i = 0; i < DIODE_COUNT; i++)
+          {
+            glitchBuffer[i] = pixels.getPixelColor(i);
+          }
+
+          pixels.clear();
+
+          for(int i = 0; i < DIODE_COUNT; i++)
+          {
+            if(glitchBuffer[i] > 0)
+            {
+              int red = constrain((glitchBuffer[i] >> 16 & 0xFF) + addColorValue, 0, 255);
+              int green = constrain((glitchBuffer[i] >> 8 & 0xFF) + addColorValue, 0, 255);
+              int blue = constrain((glitchBuffer[i] & 0xFF) + addColorValue, 0, 255);
+
+              int pos1 = i + movX + COLUMNS * movY;
+              int pos2 = i - movX + COLUMNS * movY;
+              //tu jakos zrob zeby nieparzyste movY nie odbijalo w pionie
+
+              if((i / COLUMNS) % 2 == 0)
+              {
+                if(pos1 - 1 > 0 && pos1 - 1 < DIODE_COUNT - 1 && red > 0)
+                  pixels.setPixelColor(pos1 - 1, red * 0.5f, 0, 0);
+                if(pos1 > 0 && pos1 < DIODE_COUNT - 1 && green > 0)
+                  pixels.setPixelColor(pos1, 0, green * 0.5f, 0);
+                if(pos1 + 1 > 0 && pos1 + 1 < DIODE_COUNT - 1 && blue > 0)
+                  pixels.setPixelColor(pos1 + 1, 0, 0, blue * 0.5f);
+              }
+              else
+              {
+                if(pos2 + 1 > 0 && pos2 + 1 < DIODE_COUNT - 1 && red > 0)
+                  pixels.setPixelColor(pos2 + 1, red * 0.5f, 0, 0);
+                if(pos2 > 0 && pos2 < DIODE_COUNT - 1 && green > 0)
+                  pixels.setPixelColor(pos2, 0, green * 0.5f, 0);
+                if(pos2 - 1 > 0 && pos2 - 1 < DIODE_COUNT - 1 & blue > 0)
+                  pixels.setPixelColor(pos2 - 1, 0, 0, blue * 0.5f);
+              }
+            }
+          }
+
+          pixels.show();
+          delay(100);
+
+          for(int i = 0; i < DIODE_COUNT; i++)
+          {
+            pixels.setPixelColor(i, glitchBuffer[i]);
+          }
+          pixels.show();
+
+          glitchDelay = random(minGlitchDelay, maxGlitchDelay);
+        }
+      }
+      else
+      {
+        glitchDelay--;
+      }
     }
 
     void DrawLines()
@@ -1393,6 +1467,7 @@
     }
 
     pixels.show();
+    GlitchEverything(random(-2, 3), random(-2, 3), 10);
     }
 
     ISR(PCINT2_vect)
