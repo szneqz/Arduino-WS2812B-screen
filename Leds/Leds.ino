@@ -211,6 +211,7 @@
           {{0, 0}, {1, 0}, {-2, 0}, {1, 2}, {-2, -1}},  //2>>1
           {{0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2}}   //3>>2
         };
+        int nextFigure = 0;
         int actualFigure = 0;
         int actualFigureColor = 0;
         bool randomizeFigure = false;  //czy wylosowac nowy blok
@@ -814,6 +815,7 @@
         snakeSgt[i][0] = 0;
       
       randomizeFigure = true;
+      nextFigure = random(0,7);
       tetris_mode = 0;
       tetris_score = 0;
 
@@ -821,18 +823,18 @@
         ColorSingle(i * COLUMNS + tetris_game_width, colors[1], 100);
     }
 
-    int GetFigureBlockPos(int i, int myFigPosX = -10, int myFigPosY = -10, int myFigRot = -1)
+    int GetFigureBlockPos(int i, int myFigPosX = -10, int myFigPosY = -10, int myFigRot = -1, int thisFigure = -1)
     {
       if(myFigPosX == -10) myFigPosX = figurePosX;
       if(myFigPosY == -10) myFigPosY = figurePosY;
       if(myFigRot == -1) myFigRot = figureRot;
-      return (myFigPosY + (figures[actualFigure][myFigRot][i] / 4)) * COLUMNS + myFigPosX + (figures[actualFigure][myFigRot][i] % 4);
+      if(thisFigure == -1) thisFigure = actualFigure;
+      return (myFigPosY + (figures[thisFigure][myFigRot][i] / 4)) * COLUMNS + myFigPosX + (figures[thisFigure][myFigRot][i] % 4);
     } 
 
     void DrawFigure(int lastPosX, int lastPosY, int lastRot = -1)
     {
-      if(lastRot == -1)
-        lastRot = figureRot;
+      if(lastRot == -1) lastRot = figureRot;
 
       for(int i = 0; i < 4; i++)
       {
@@ -844,6 +846,28 @@
       {
         int figureBlockPos = GetFigureBlockPos(i, figurePosX, figurePosY);
         ColorSingle(figureBlockPos, colors[actualFigureColor], 20);
+      }
+    }
+
+    void DrawAnyFigure(int myFigPosX = -10, int myFigPosY = -10, int myFigRot = -1, int thisFigure = -1)
+    {
+      if(myFigPosX == -10) myFigPosX = figurePosX;
+      if(myFigPosY == -10) myFigPosY = figurePosY;
+      if(myFigRot == -1) myFigRot = figureRot;
+      if(thisFigure == -1) thisFigure = actualFigure;
+
+      for(int i = 0; i < 4; i++)
+      { //zamaluj kwadrat 4 na 4 na czarno
+        for(int j = 0; j < 4; j++)
+        {
+          ColorSingle((myFigPosY + i) * COLUMNS + myFigPosX + j, colors[0], 100);
+        }
+      }
+
+      for(int i = 0; i < 4; i++)
+      {
+        int figureBlockPos = GetFigureBlockPos(i, myFigPosX, myFigPosY, myFigRot, thisFigure);
+        ColorSingle(figureBlockPos, colors[tetris_colors[thisFigure]], 20);
       }
     }
 
@@ -1016,8 +1040,10 @@
     {
       if(randomizeFigure)
       {
-        actualFigure = random(0,7);
+        actualFigure = nextFigure;
         actualFigureColor = tetris_colors[actualFigure];
+        nextFigure = random(0,7);
+        DrawAnyFigure(tetris_game_width + 3, 2, 0, nextFigure); //rysuj kolejna figure
         figurePosX = figurePosXStart;
         figurePosY = 0;
         figureRot = 0;
