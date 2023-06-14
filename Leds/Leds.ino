@@ -28,7 +28,8 @@
     //SpritesStaticValues
     #define SPRITE_ANIMATED_EYES 0
     #define SPRITE_COLORFUL_CAT 1
-    #define MAX_SPRITE_NR 7
+    #define SPRITE_BLINK_HAPPY_FACE 2
+    #define MAX_SPRITE_NR 8
 
     //DrawLines
     #define LINES_AMOUNT 10
@@ -81,6 +82,24 @@
       {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 
       0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00011100, 0b00001110, 0b00000000, 0b00000000, 
       0b10000000, 0b01001100, 0b00000000, 0b11001100, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000}
+    };
+
+    byte happyFace[][30] = {
+      {0b00000000, 0b00000000, 0b11100000, 0b11110011, 0b00000001, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b01100000, 
+      0b00011000, 0b10000000, 0b01100001, 0b00000000, 0b10000110, 0b00000001, 0b00011000, 0b00000110, 0b00000000, 0b00000000, 
+      0b00000000, 0b00000000, 0b00000000, 0b11001100, 0b00000000, 0b11100000, 0b00000001, 0b00000000, 0b00000000, 0b00000000},
+
+      {0b00000000, 0b00110000, 0b00000000, 0b10000000, 0b00000001, 0b00000000, 0b00001100, 0b00001111, 0b00100000, 0b00000110, 
+      0b00011000, 0b11000000, 0b01100000, 0b10000000, 0b10000111, 0b00000001, 0b00000000, 0b00000110, 0b00000000, 0b00000000, 
+      0b00000000, 0b00000000, 0b00000000, 0b11001100, 0b00000000, 0b11100000, 0b00000001, 0b00000000, 0b00000011, 0b00000000},
+
+      {0b00110000, 0b00000000, 0b01100000, 0b00000000, 0b11000000, 0b00000000, 0b00000000, 0b00000001, 0b00111100, 0b01100000, 
+      0b10000000, 0b10000001, 0b11000001, 0b00000000, 0b10000110, 0b00000111, 0b00011000, 0b00000000, 0b00000000, 0b00000000, 
+      0b00000000, 0b00000000, 0b00000000, 0b11001100, 0b00000000, 0b11100000, 0b00000001, 0b00000000, 0b00000011, 0b00000000},
+
+      {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00011110, 0b00011110, 0b00000100, 
+      0b10000000, 0b11000000, 0b11000000, 0b10000000, 0b10000111, 0b00000111, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 
+      0b10000000, 0b01100001, 0b00000000, 0b11001100, 0b00000000, 0b11100000, 0b00000001, 0b00000000, 0b00000000, 0b00000000}
     };
 
     byte menuSprites[][30] = {
@@ -141,6 +160,10 @@
 
       //catSprite
       bool isHappy = false;
+
+      //blinkHappyFace
+      bool blinkLeft = false;
+      bool blinkRight = false;
       //
 
       //dla DrawLines
@@ -361,9 +384,22 @@
       delay(20);
     }
 
+    void BlinkHappyFace()
+    {
+      int offset = 0;
+      if(blinkLeft)
+        offset = 1;
+      if(blinkRight)
+        offset = 2;
+      if(blinkLeft && blinkRight)
+        offset = 3;
+
+      ColorHEX(happyFace[0 + offset], colors[option + 1], 30, colors[0], 2);
+    }
+
     void StaticSprite()
     {
-      int actSprite = staticSpriteNr - 2; //-2 bo są dwa niestatyczne obrazy
+      int actSprite = staticSpriteNr - 3; //-3 bo są trzy niestatyczne obrazy
       if(refresh)
       {
         ColorHEX(staticSprites[actSprite], colors[option + 1], 30, colors[0], 2);
@@ -1438,6 +1474,9 @@
         {
           if(staticSpriteNr == SPRITE_COLORFUL_CAT)
             isHappy = true;
+          
+          if(staticSpriteNr == SPRITE_BLINK_HAPPY_FACE)
+            blinkLeft = true;
         }
       }
     }
@@ -1449,6 +1488,9 @@
         {
           if(staticSpriteNr == SPRITE_COLORFUL_CAT)
             isHappy = false;
+
+          if(staticSpriteNr == SPRITE_BLINK_HAPPY_FACE)
+            blinkLeft = false;
         }
       }
     }
@@ -1463,6 +1505,29 @@
         }
       }
       bitClear(flags_oneClick, BTN_2);
+    }
+
+    if(bitRead(flags_holdClick, BTN_2))
+    { //btn2
+      if(!isMainOpt)
+      {
+        if(mainOption == FACE_ID)
+        {
+          if(staticSpriteNr == SPRITE_BLINK_HAPPY_FACE)
+            blinkRight = true;
+        }
+      }
+    }
+    else
+    {
+      if(!isMainOpt)
+      {
+        if(mainOption == FACE_ID)
+        {
+          if(staticSpriteNr == SPRITE_BLINK_HAPPY_FACE)
+            blinkRight = false;
+        }
+      }
     }
 
     if(bitRead(flags_holdClick, BTN_2) && bitRead(flags_holdClick, BTN_LEFT) && bitRead(flags_holdClick, BTN_RIGHT))
@@ -1486,6 +1551,8 @@
         BlinkingEyes(option + 1);
       else if (staticSpriteNr == SPRITE_COLORFUL_CAT)
         ColorfulCat();
+      else if (staticSpriteNr == SPRITE_BLINK_HAPPY_FACE)
+        BlinkHappyFace();
       else
         StaticSprite();
       }
