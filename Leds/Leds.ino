@@ -4,7 +4,7 @@
     #define DIODE_COUNT 234
     #define ROWS 13
     #define COLUMNS 18
-    #define MAX_OPTION 4
+    #define MAX_OPTION 5
     #define MIN_OPTION 0
 
     #define DEBOUNCE_TIME 50
@@ -23,6 +23,7 @@
     #define SNAKE_ID 2
     #define ARKANOID_ID 3
     #define TETRIS_ID 4
+    #define GLITCH_ID 5
 
     //SpritesStaticValues
     #define SPRITE_ANIMATED_EYES 0
@@ -101,7 +102,11 @@
 
       {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000100, 0b10000000, 0b01011000, 0b00001111, 
       0b00100111, 0b00100001, 0b00000000, 0b10001100, 0b11000111, 0b00000011, 0b00000000, 0b01000000, 0b00000000, 0b10001100, 
-      0b00000001, 0b01100000, 0b00000100, 0b00100000, 0b00000000, 0b10000000, 0b00110000, 0b00000000, 0b01100011, 0b00000000}
+      0b00000001, 0b01100000, 0b00000100, 0b00100000, 0b00000000, 0b10000000, 0b00110000, 0b00000000, 0b01100011, 0b00000000},
+
+      {0b11100000, 0b00001000, 0b01000000, 0b00100000, 0b00000010, 0b10001101, 0b00000000, 0b00100100, 0b01000110, 0b11100000, 
+      0b00000000, 0b00111101, 0b00000000, 0b10000100, 0b00000111, 0b00000000, 0b00000000, 0b10010000, 0b00000000, 0b11011000, 
+      0b11000011, 0b00010011, 0b00001001, 0b00100010, 0b00010010, 0b00001000, 0b00000011, 0b00100000, 0b00000000, 0b00000000}
     };
 
     byte staticSprites[][30] = {
@@ -147,13 +152,16 @@
       //
 
       //dla Glitcha
+        bool glitchActive = false;
         uint32_t glitchBuffer[DIODE_COUNT];
         int maxGlitchDelay = 80;
         int minGlitchDelay = 25;
         int glitchDelay = 50;
+        int miniOk[4][4] = {{0,0,0,0}, {0,0,0,3}, {3,0,3,0}, {0,3,0,0}};
+        int miniNope[4][4] = {{5,0,0,5}, {0,5,5,0}, {0,5,5,0}, {5,0,0,5}};
       //
 
-      //dla Sanke game
+      //dla Snake game
         int snakeSgt[DIODE_COUNT][2]; //wspolne dla snake, arkanoid, tetris
         int head = 0;
         int tail_len = 3;
@@ -364,14 +372,32 @@
       delay(20);
     }
 
-    void GlitchEverything(int movX, int movY, int addColorValue)
+    void DrawGlitchSigns()
+    {
+      int* miniSprite;
+
+      if(glitchActive)
+        miniSprite = (int*)miniOk;
+      else
+        miniSprite = (int*)miniNope;
+      
+        for(int i = 0; i < 4; i++)
+        {
+          for(int j = 0; j < 4; j++)
+          {
+            ColorSingle((ROWS - 5) * COLUMNS + i * COLUMNS + j, colors[*(miniSprite + i * 4 + j)], 100);
+          }
+        }
+    }
+
+    void GlitchEverything(int addColorValue, int glitchTimes)
     {
       if(glitchDelay <= 0)
       {
-        for(int times = 0; times < 2; times++)
+        for(int times = 0; times < glitchTimes; times++)
         {
-          movX = random(-2, 3);
-          movY = random(-2, 3);
+          int movX = random(-2, 3);
+          int movY = random(-2, 3);
 
           for(int i = 0; i < DIODE_COUNT; i++)
           {
@@ -1204,7 +1230,12 @@
     void loop()
     {
     if(isMainOpt)
+    {
       delay(20);
+
+      if(mainOption == GLITCH_ID)
+        DrawGlitchSigns();
+    }
       
     if(bitRead(flags_oneClick, BTN_LEFT))
     { //left
@@ -1382,6 +1413,12 @@
 
         if(mainOption == TETRIS_ID)
           ResetTetris();
+
+        if(mainOption == GLITCH_ID)
+        {
+          glitchActive = !glitchActive;
+          isMainOpt = true; //nie wychodze z opcji
+        }
       }
       else
       {
@@ -1467,7 +1504,9 @@
     }
 
     pixels.show();
-    GlitchEverything(random(-2, 3), random(-2, 3), 10);
+
+    if(glitchActive)
+      GlitchEverything(10, random(1, 4));
     }
 
     ISR(PCINT2_vect)
