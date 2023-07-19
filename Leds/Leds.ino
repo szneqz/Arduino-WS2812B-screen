@@ -419,7 +419,7 @@
     Adafruit_NeoPixel pixels = Adafruit_NeoPixel(DIODE_COUNT, PIN, NEO_GRB + NEO_KHZ800);
     
     byte switches = 0;  //left, up, right, down, btn1, btn2
-    unsigned long lastIntMillis = 0;
+    unsigned long lastIntMillis[6] = {0, 0, 0, 0, 0, 0};
     int colors[16][3] = {{0, 0, 0}, {0, 0, 255}, {0, 128, 128}, {0, 255, 0}, {128, 128, 0}, {255, 0, 0}, {128, 0, 128}, {85, 85, 85}, 
                         {51, 102, 102}, {102, 51, 102}, {102, 102, 51}, {0, 85, 170}, {0, 170, 85}, {85, 170, 0}, {170, 85, 0}, {170, 0, 85}};
     int colorsRGB[3] = {1, 3, 5};
@@ -1765,28 +1765,45 @@
     {
       switches = PINK; // get PORTK value
       refresh = true;
+	  unsigned long currentMillis = millis();
 
       //buttony na click
-      if(millis() - lastIntMillis > DEBOUNCE_TIME)
+      if(!bitRead(switches, BTN_LEFT) && ((lastIntMillis[BTN_LEFT] + DEBOUNCE_TIME) < currentMillis)) //left
       {
-        if(!bitRead(switches, BTN_LEFT)) //left
-          bitSet(flags_oneClick, BTN_LEFT);
-          
-        if(!bitRead(switches, BTN_UP)) //up
-          bitSet(flags_oneClick, BTN_UP);
-          
-        if(!bitRead(switches, BTN_RIGHT)) //right
-          bitSet(flags_oneClick, BTN_RIGHT);
-          
-        if(!bitRead(switches, BTN_DOWN)) //down
-          bitSet(flags_oneClick, BTN_DOWN);
-          
-        if(!bitRead(switches, BTN_1)) //btn1
-          bitSet(flags_oneClick, BTN_1);
-          
-        if(!bitRead(switches, BTN_2)) //btn2
-          bitSet(flags_oneClick, BTN_2);
+        bitSet(flags_oneClick, BTN_LEFT);
+		lastIntMillis[BTN_LEFT] = currentMillis;
       }
+      
+      if(!bitRead(switches, BTN_UP) && ((lastIntMillis[BTN_UP] + DEBOUNCE_TIME) < currentMillis)) //up
+      {
+        bitSet(flags_oneClick, BTN_UP);
+		lastIntMillis[BTN_UP] = currentMillis;
+      }
+      
+      if(!bitRead(switches, BTN_RIGHT) && ((lastIntMillis[BTN_RIGHT] + DEBOUNCE_TIME) < currentMillis)) //right
+      {
+        bitSet(flags_oneClick, BTN_RIGHT);
+		lastIntMillis[BTN_RIGHT] = currentMillis;
+      }
+      
+      if(!bitRead(switches, BTN_DOWN) && ((lastIntMillis[BTN_DOWN] + DEBOUNCE_TIME) < currentMillis)) //down
+      {
+        bitSet(flags_oneClick, BTN_DOWN);
+		lastIntMillis[BTN_DOWN] = currentMillis;
+      }
+      
+      if(!bitRead(switches, BTN_1) && ((lastIntMillis[BTN_1] + DEBOUNCE_TIME) < currentMillis)) //btn1
+      {
+        bitSet(flags_oneClick, BTN_1);
+		lastIntMillis[BTN_1] = currentMillis;
+      }
+      
+      if(!bitRead(switches, BTN_2) && ((lastIntMillis[BTN_2] + DEBOUNCE_TIME) < currentMillis)) //btn2
+      {
+        bitSet(flags_oneClick, BTN_2);
+		lastIntMillis[BTN_2] = currentMillis;
+      }
+
 
       //buttony na przytrzymanie
         if(!bitRead(switches, BTN_LEFT)) //left
@@ -1819,6 +1836,6 @@
         else
           bitClear(flags_holdClick, BTN_2);
       
-      lastIntMillis = millis();
+      //lastIntMillis = millis();
       //Serial.println(switches, BIN);
     }
