@@ -8,5 +8,5 @@ Features:
 - glitch mode
 - some of the images react to pressing buttons
 
-![](https://github.com/szneqz/Arduino-WS2812B-screen/blob/master/readme_files/happy.jpeg)
-![](https://github.com/szneqz/Arduino-WS2812B-screen/blob/master/readme_files/snake.gif)
+![Image](./readme_files/happy.jpeg)
+![GifImage](./snake.gif)
