@@ -44,8 +44,6 @@ unsigned long lastMillis = 0;
 unsigned long calcMillis = 0;
 
 //functions delay
-const unsigned long maxMainMenuDelay = 20;
-unsigned long mainMenuDelay = 0;
 const unsigned long maxBlinkHappyFaceDelay = 20;
 unsigned long blinkHappyFaceDelay = 0;
 const unsigned long maxFireAnimatedDelay = 35;
@@ -62,8 +60,10 @@ const unsigned long maxTetrisGameDelay = 20;
 unsigned long tetrisGameDelay = 0;
 const unsigned long maxMoveTetrisLeftRightDelay = 30;
 unsigned long moveTetrisLeftRightDelay = 0;
-const unsigned long maxGlitchDelay2 = 5;
-unsigned long glitchDelay2 = 0;
+const unsigned long maxDrawGlitchSignsDelay = 20;
+unsigned long drawGlitchSignsDelay = 0;
+const unsigned long maxGlitchGlobalDelay = 5;
+unsigned long glitchGlobalDelay = 0;
 
 byte sprites[4][30] = {
   { 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000011, 0b00000011, 0b00010010, 0b00010010, 0b01001000,
@@ -542,7 +542,7 @@ void ColorfulCat() {
 }
 
 void BlinkHappyFace() {
-  if(blinkHappyFaceDelay >= maxBlinkHappyFaceDelay) {
+  while (blinkHappyFaceDelay >= maxBlinkHappyFaceDelay) {
     blinkHappyFaceDelay -= maxBlinkHappyFaceDelay;
 
     int offset = 0;
@@ -555,13 +555,12 @@ void BlinkHappyFace() {
 
   ColorHEX(happyFace[0 + offset], colors[option + 1], 30, colors[0], 2);
   }
-  else {
-    blinkHappyFaceDelay += calcMillis;
-  }
+
+  blinkHappyFaceDelay += calcMillis;
 }
 
 void FireAnimated() {
-  if(fireAnimatedDelay >= maxFireAnimatedDelay) {
+  while (fireAnimatedDelay >= maxFireAnimatedDelay) {
     fireAnimatedDelay -= maxFireAnimatedDelay;
 
     ColorHEX(fire[0 + fireSpriteNr * 3], fireColors[option][0], 10, colors[0], 2);
@@ -572,9 +571,8 @@ void FireAnimated() {
     if (fireSpriteNr >= fireMaxSprite)
       fireSpriteNr = 0;
   }
-  else {
-    fireAnimatedDelay += calcMillis;
-  }
+
+  fireAnimatedDelay += calcMillis;
 }
 
 void SpaceInvaders(int spaceInvaderNr) {
@@ -601,24 +599,31 @@ void StaticSprite() {
 }
 
 void DrawGlitchSigns() {
-  int *miniSprite;
+  while (drawGlitchSignsDelay >= maxDrawGlitchSignsDelay) {
+    drawGlitchSignsDelay -= maxDrawGlitchSignsDelay;
 
-  if (glitchActive)
-    miniSprite = (int *)miniOk;
-  else
-    miniSprite = (int *)miniNope;
+    int *miniSprite;
 
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      ColorSingle((ROWS - 5) * COLUMNS + i * COLUMNS + j, colors[*(miniSprite + i * 4 + j)], 100);
+    if (glitchActive)
+      miniSprite = (int *)miniOk;
+    else
+      miniSprite = (int *)miniNope;
+
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        ColorSingle((ROWS - 5) * COLUMNS + i * COLUMNS + j, colors[*(miniSprite + i * 4 + j)], 100);
+      }
     }
   }
+
+  drawGlitchSignsDelay += calcMillis;
+
 }
 
 void GlitchEverything(int addColorValue, int glitchTimes) {
   //Fix glitching - it works differently
-  if(glitchDelay2 >= maxGlitchDelay2) {
-    glitchDelay2 -= maxGlitchDelay2;
+  while (glitchGlobalDelay >= maxGlitchGlobalDelay) {
+    glitchGlobalDelay -= maxGlitchGlobalDelay;
 
     if (glitchDelay <= 0) {
       for (int times = 0; times < glitchTimes; times++) {
@@ -673,13 +678,12 @@ void GlitchEverything(int addColorValue, int glitchTimes) {
       glitchDelay--;
     }
   }
-  else {
-    glitchDelay2 += calcMillis;
-  }
+
+  glitchGlobalDelay += calcMillis;
 }
 
 void DrawLines() {
-  if(drawLinesDelay >= maxDrawLinesDelay) {
+  while (drawLinesDelay >= maxDrawLinesDelay) {
     drawLinesDelay -= maxDrawLinesDelay;
 
     for (int i = 0; i < LINES_AMOUNT; i++) {
@@ -748,9 +752,8 @@ void DrawLines() {
       pixels.setPixelColor(j, gColors[2] / 2, gColors[1] / 2, gColors[0] / 2);
     }
   }
-  else {
-    drawLinesDelay += calcMillis;
-  }
+
+  drawLinesDelay += calcMillis;
 }
 
 void SpawnFruit() {
@@ -789,10 +792,12 @@ void ResetSnake() {
 
   for (int i = 0; i < tail_len; i++)
     ColorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[1], 100);
+
+  snakeGameDelay = maxSnakeGameDelay; //reset snake timer
 }
 
 void SnakeGame() {
-  if (snakeGameDelay > maxSnakeGameDelay) {
+  while (snakeGameDelay >= maxSnakeGameDelay) {
     snakeGameDelay -= maxSnakeGameDelay;
 
     if (snake_mode == 1) {
@@ -892,9 +897,8 @@ void SnakeGame() {
       }
     }
   }
-  else {
-    snakeGameDelay += calcMillis;
-  }
+
+  snakeGameDelay += calcMillis;
 }
 
 void Normalize(float pos[2]) {
@@ -961,10 +965,11 @@ void ResetArkanoid() {
       snakeSgt[j * COLUMNS + i][0] = 3;
 
   arkanoidGameDelay = maxArkanoidGameDelay;
+  moveArkanoidLeftRightDelay = maxMoveArkanoidLeftRightDelay;
 }
 
 void MoveArkanoidLeftRight(int dir) {
-  if(moveArkanoidLeftRightDelay > maxMoveArkanoidLeftRightDelay) {
+  while (moveArkanoidLeftRightDelay >= maxMoveArkanoidLeftRightDelay) {
     moveArkanoidLeftRightDelay -= maxMoveArkanoidLeftRightDelay;
 
   if (dir > 0 && palettePos < maxPalettePos)
@@ -972,13 +977,12 @@ void MoveArkanoidLeftRight(int dir) {
   else if (dir < 0 && palettePos > 0)
     palettePos--;
   }
-  else {
-    moveArkanoidLeftRightDelay += calcMillis;
-  }
+
+  moveArkanoidLeftRightDelay += calcMillis;
 }
 
 void ArkanoidGame() {
-  if(arkanoidGameDelay > maxArkanoidGameDelay) {
+  while (arkanoidGameDelay >= maxArkanoidGameDelay) {
     arkanoidGameDelay -= maxArkanoidGameDelay;
 
     //black line on bottom
@@ -1088,9 +1092,8 @@ void ArkanoidGame() {
     if (respawn_time > 0)
       respawn_time--;
   }
-  else {
-    arkanoidGameDelay += calcMillis;
-  }
+
+  arkanoidGameDelay += calcMillis;
 }
 
 void ResetTetris() {
@@ -1106,6 +1109,7 @@ void ResetTetris() {
     ColorSingle(i * COLUMNS + tetris_game_width, colors[1], 100);
 
   tetrisGameDelay = maxTetrisGameDelay;
+  moveTetrisLeftRightDelay = maxMoveTetrisLeftRightDelay;
 }
 
 int GetFigureBlockPos(int i, int myFigPosX = -10, int myFigPosY = -10, int myFigRot = -1, int thisFigure = -1) {
@@ -1230,7 +1234,7 @@ void RotateTetrisFigure(int dir)  //1 - clockwise  -1 - counter clockwise
 }
 
 void MoveTetrisLeftRight(int dir) {
-  if(moveTetrisLeftRightDelay > maxMoveTetrisLeftRightDelay) {
+  while (moveTetrisLeftRightDelay >= maxMoveTetrisLeftRightDelay) {
     moveTetrisLeftRightDelay -= maxMoveTetrisLeftRightDelay;
     if (tetris_mode == 1) {
       bool canMove = true;
@@ -1249,9 +1253,8 @@ void MoveTetrisLeftRight(int dir) {
       }
     }
   }
-  else {
-    moveTetrisLeftRightDelay += calcMillis;
-  }
+
+  moveTetrisLeftRightDelay += calcMillis;
 }
 
 void CheckWholeLines(int minHeight, int maxHeight) {
@@ -1287,7 +1290,7 @@ void CheckWholeLines(int minHeight, int maxHeight) {
 
 void TetrisGame() {
   Serial.println("Tetris: " + String(tetrisGameDelay));
-  if(tetrisGameDelay > maxTetrisGameDelay) {
+  while (tetrisGameDelay >= maxTetrisGameDelay) {
     tetrisGameDelay -= maxTetrisGameDelay;
 
     if (randomizeFigure) {
@@ -1347,9 +1350,8 @@ void TetrisGame() {
       }
     }
   }
-  else {
-    tetrisGameDelay += calcMillis;
-  }
+
+  tetrisGameDelay += calcMillis;
 }
 
 void setup() {
@@ -1378,9 +1380,8 @@ void loop() {
   calcMillis = millis() - lastMillis;
   lastMillis = millis();
 
-  if (isMainOpt && mainMenuDelay >= maxMainMenuDelay) {
-    if (mainOption == GLITCH_ID)
-      DrawGlitchSigns();
+  if (isMainOpt && mainOption == GLITCH_ID) {
+    DrawGlitchSigns();
   }
 
   if (bitRead(flags_oneClick, BTN_LEFT)) {  //left
@@ -1526,6 +1527,8 @@ void loop() {
         ResetTetris();
 
       if (mainOption == GLITCH_ID) {
+        drawGlitchSignsDelay = maxDrawGlitchSignsDelay;
+        glitchGlobalDelay = maxGlitchGlobalDelay;
         glitchActive = !glitchActive;
         isMainOpt = true;  //nie wychodze z opcji
       }
@@ -1632,13 +1635,6 @@ void loop() {
 
   if (glitchActive)
     GlitchEverything(10, random(1, 4));
-
-  if(mainMenuDelay >= maxMainMenuDelay) {
-    mainMenuDelay -= maxMainMenuDelay;
-  }
-  else {
-    mainMenuDelay += calcMillis;
-  }
 }
 
 ISR(PCINT2_vect) {
