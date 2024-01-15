@@ -9,4 +9,4 @@ Features:
 - some of the images react to pressing buttons
 
 ![Image](./readme_files/happy.jpeg)
-![GifImage](./snake.gif)
+![GifImage](./readme_files/snake.gif)
