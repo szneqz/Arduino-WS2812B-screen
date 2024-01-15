@@ -308,21 +308,21 @@ byte staticSprites[][30] = {
 
 };
 
-//dla spriteów
-bool refresh = true;  //flaga odśeiżania obrazka
+//spirte values
+bool refresh = true;  //flag for refreshing image
 int spriteNr = 0;
 int staticSpriteNr = 0;
 int spriteInc = -1;
 int actDelay = 0;
 
-//catSprite
+//CatSprite values
 bool isHappy = false;
 
-//blinkHappyFace
+//BlinkHappyFace values
 bool blinkLeft = false;
 bool blinkRight = false;
 
-//fireAnimated
+//FireAnimated values
 int fireSpriteNr = 0;
 const int fireMaxSprite = 8;
 const int fireColors[5][3][3] = { { { 248, 56, 0 }, { 248, 184, 0 }, { 248, 216, 120 } },
@@ -331,13 +331,13 @@ const int fireColors[5][3][3] = { { { 248, 56, 0 }, { 248, 184, 0 }, { 248, 216,
                                   { { 0, 136, 136 }, { 0, 232, 216 }, { 184, 248, 216 } },
                                   { { 122, 9, 250 }, { 217, 61, 251 }, { 254, 139, 215 } } };
 
-//spaceInvaders
+//SpaceInvaders values
 const int spaceInvadersMaxDelay = 500;
 int spaceInvadersActDelay = spaceInvadersMaxDelay;
 int spaceInvadersState = 0;
 //
 
-//dla DrawLines
+//DrawLines values
 int act[LINES_AMOUNT][2] = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
 int dest[LINES_AMOUNT][2] = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
 int colorNr[LINES_AMOUNT] = { 1, 2, 3, 5, 7, 8, 9, 10, 13, 15 };
@@ -345,7 +345,7 @@ int nextColorNr = 1;
 int dir[LINES_AMOUNT] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 //
 
-//dla Glitcha
+//Glitcha values
 bool glitchActive = false;
 uint32_t glitchBuffer[DIODE_COUNT];
 int maxGlitchDelay = 80;
@@ -355,18 +355,18 @@ int miniOk[4][4] = { { 0, 0, 0, 0 }, { 0, 0, 0, 3 }, { 3, 0, 3, 0 }, { 0, 3, 0, 
 int miniNope[4][4] = { { 5, 0, 0, 5 }, { 0, 5, 5, 0 }, { 0, 5, 5, 0 }, { 5, 0, 0, 5 } };
 //
 
-//dla Snake game
-int snakeSgt[DIODE_COUNT][2];  //wspolne dla snake, arkanoid, tetris
+//SnakeGame values
+int snakeSgt[DIODE_COUNT][2];  //shared with arkanoid and tetris
 int head = 0;
 int tail_len = 3;
 int snake_dir = 0;  //0 - right, 1 - down, 2 - left, 3 - up
 int fruit_pos[2];
 int snake_mode = 0;    //-1 dead, 0 static, 1 playing
-int snake_delay = 30;  //30 okresow po 100 milisekund czyli 3 sekundy
+int snake_delay = 30;
 bool snake_visible = true;
 //
 
-//dla Arkanoid game
+//ArkanoidGame values
 int paletteSize = 3;
 int palettePosOnStart = (COLUMNS / 2) - (paletteSize / 2) - 1;
 int palettePos = palettePosOnStart;
@@ -376,24 +376,24 @@ float ballDirection[2];
 float ballSpeed = 0.45f;
 int arkanoid_mode = 0;  //-1 dead, 0 static, 1 playing
 int arkanoid_lives = 3;
-int max_respawn_time = 40;  //40 okresow po 50 milisekund czyli 2 sekundy
+int max_respawn_time = 40;
 int respawn_time = 0;
 //
 
-//dla Tetris game
+//TetrisGame values
 int figurePosX = 0;
 int figurePosY = 0;
 const int figurePosXStart = 3;
-int figureRot = 0;  //4 rotacje
+int figureRot = 0;  //4 rotations
 int tetris_colors[7] = { 2, 5, 3, 1, 14, 6, 4 };
 int figures[7][4][4] = {
-  { { 4, 5, 6, 7 }, { 2, 6, 10, 14 }, { 8, 9, 10, 11 }, { 1, 5, 9, 13 } },  // linia
+  { { 4, 5, 6, 7 }, { 2, 6, 10, 14 }, { 8, 9, 10, 11 }, { 1, 5, 9, 13 } },  // line
   { { 0, 1, 5, 6 }, { 2, 5, 6, 9 }, { 4, 5, 9, 10 }, { 1, 4, 5, 8 } },      // Z
-  { { 1, 2, 4, 5 }, { 1, 5, 6, 10 }, { 5, 6, 8, 9 }, { 0, 4, 5, 9 } },      // Z odwrotne
+  { { 1, 2, 4, 5 }, { 1, 5, 6, 10 }, { 5, 6, 8, 9 }, { 0, 4, 5, 9 } },      // Z reversed
   { { 0, 4, 5, 6 }, { 1, 2, 5, 9 }, { 4, 5, 6, 10 }, { 1, 5, 8, 9 } },      // J
   { { 2, 4, 5, 6 }, { 1, 5, 9, 10 }, { 4, 5, 6, 8 }, { 0, 1, 5, 9 } },      // L
   { { 1, 4, 5, 6 }, { 1, 5, 6, 9 }, { 4, 5, 6, 9 }, { 1, 4, 5, 9 } },       // |-
-  { { 1, 2, 5, 6 }, { 1, 2, 5, 6 }, { 1, 2, 5, 6 }, { 1, 2, 5, 6 } }        // kwadrat
+  { { 1, 2, 5, 6 }, { 1, 2, 5, 6 }, { 1, 2, 5, 6 }, { 1, 2, 5, 6 } }        // square
 };
 const int wallKicksAmount = 5;
 int regularWallKicksClockwise[4][5][2] = {
@@ -423,21 +423,21 @@ int iWallKicksCounterClockwise[4][5][2]{
 int nextFigure = 0;
 int actualFigure = 0;
 int actualFigureColor = 0;
-bool randomizeFigure = false;      //czy wylosowac nowy blok
-const int tetris_game_width = 10;  //standardowa rozgrywka
+bool randomizeFigure = false;      //if create new random figure
+const int tetris_game_width = 10;  //standard game width
 int tetris_mode = 0;               //-1 dead, 0 static, 1 playing
 const int fast_movement_block_delay = 1;
 const int movement_block_delay = 20;
 int actual_movement_block_delay = movement_block_delay;
-int block_delay = movement_block_delay;  //20 okresów po 50 milisekund czyli 1 sekunda
+int block_delay = movement_block_delay;
 int start_block_delay = movement_block_delay;
 int tetris_score = 0;
 //
 
-//dla ogolnego menu
-int mainOption = 0;     //główne menu
-bool isMainOpt = true;  //czy jestesmy w glownym menu
-int option = 0;         //menu podrzędne dla "aplikacji"
+//MainMenu values
+int mainOption = 0;     //MainMenu option
+bool isMainOpt = true;  //if in MainMenu
+int option = 0;         //application menu option
 byte flags_oneClick = 0b00000000;
 byte flags_holdClick = 0b00000000;
 //
@@ -494,7 +494,7 @@ void HSVtoRGB(float h, float s, float v, int *rgb) {
   rgb[2] = v * Mix(1.0, constrain(abs(Fract(h + 0.3333333) * 6.0 - 3.0) - 1.0, 0.0, 1.0), s) * 255;
 }
 
-void BlinkingEyes(int nrColor) {  //mrugam oczkami z losowa czestotliwoscia
+void BlinkingEyes(int nrColor) {  //blinking eyes with random frequency
   if (actDelay <= 0) {
     refresh = true;
     if (spriteNr % 3 == 0)
@@ -644,7 +644,7 @@ void GlitchEverything(int addColorValue, int glitchTimes) {
 
             int pos1 = i + movX + COLUMNS * movY;
             int pos2 = i - movX + COLUMNS * movY;
-            //tu jakos zrob zeby nieparzyste movY nie odbijalo w pionie
+            //odd movY shouldn't reflect in vertical
 
             if ((i / COLUMNS) % 2 == 0) {
               if (pos1 - 1 > 0 && pos1 - 1 < DIODE_COUNT - 1 && red > 0)
@@ -784,7 +784,7 @@ void ResetSnake() {
   head = 0;
   tail_len = 3;
   snake_dir = 0;                                                       //0 - right, 1 - down, 2 - left, 3 - up
-  ColorSingle(fruit_pos[1] * COLUMNS + fruit_pos[0], colors[0], 100);  //zamaluj poprzedniego
+  ColorSingle(fruit_pos[1] * COLUMNS + fruit_pos[0], colors[0], 100);  //paint over the previous one
   SpawnFruit();
   snake_mode = 0;  //set static
   snake_delay = 30;
@@ -801,17 +801,17 @@ void SnakeGame() {
     snakeGameDelay -= maxSnakeGameDelay;
 
     if (snake_mode == 1) {
-      //zapamietaj poprzednia pozycje glowy
+      //save previous head position
       int prevHead[2];
       prevHead[0] = snakeSgt[head][0];
       prevHead[1] = snakeSgt[head][1];
 
-      //glowa w miejscu ogona zawsze
+      //head position should be always moved to tail position
       head--;
       if (head < 0)
         head = tail_len - 1;
 
-      //zapamietaj poprzednie ulozenie ogona
+      //save previous tail position
       int prevTail[2];
       prevTail[0] = snakeSgt[head][0];
       prevTail[1] = snakeSgt[head][1];
@@ -839,19 +839,19 @@ void SnakeGame() {
         snakeSgt[head][1] = 0;
 
       if (snake_visible) {
-        for (int i = 0; i < tail_len; i++) {  //maluj weza
+        for (int i = 0; i < tail_len; i++) {  //draw snake
           int tmpColor[3];
           HSVtoRGB((float)i / tail_len, 1, 1, tmpColor);
           ColorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], tmpColor, 50);
         }
       } else {
-        for (int i = 0; i < tail_len; i++)  //usuwaj weza
+        for (int i = 0; i < tail_len; i++)  //remove snake
           ColorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[0], 100);
       }
 
       ColorSingle(fruit_pos[1] * COLUMNS + fruit_pos[0], colors[7], 100);
 
-      //zdobywanie punktu
+      //scoring point
       if (snakeSgt[head][0] == fruit_pos[0] && snakeSgt[head][1] == fruit_pos[1]) {
         tail_len++;
         SpawnFruit();
@@ -867,7 +867,7 @@ void SnakeGame() {
         head++;
       }
 
-      //smierc przy zderzeniu z samym soba
+      //death when crashing into itself
       for (int i = 0; i < tail_len; i++) {
         if (i == head)
           continue;
@@ -877,16 +877,16 @@ void SnakeGame() {
         }
       }
 
-      ColorSingle(prevTail[1] * COLUMNS + prevTail[0], colors[0], 100);  //zamaluj za ogonem (oszczednosc obliczen :3)
+      ColorSingle(prevTail[1] * COLUMNS + prevTail[0], colors[0], 100);  //remove segments on previeous position of tail
     } else {
       if (snake_visible) {
-        for (int i = 0; i < tail_len; i++) {  //maluj weza
+        for (int i = 0; i < tail_len; i++) {  //draw snake
           int tmpColor[3];
           HSVtoRGB((float)i / tail_len, 1, 1, tmpColor);
           ColorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], tmpColor, 50);
         }
       } else {
-        for (int i = 0; i < tail_len; i++)  //usuwaj weza
+        for (int i = 0; i < tail_len; i++)  //remove snake
           ColorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[0], 100);
       }
       if (snake_mode == -1) {
@@ -925,7 +925,7 @@ void Check45DegAngle(float sidesLength[2]) {
 }
 
 void ResetArkanoidBall() {
-  //usuwanie poprzedniej paletki
+  //remove last rendered paddle
   for (int i = 0; i < paletteSize; i++)
     ColorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[0], 100);
 
@@ -990,7 +990,7 @@ void ArkanoidGame() {
       ColorSingle((ROWS - 1) * COLUMNS + i, colors[0], 100);
     }
 
-    //poruszanie paletki
+    //moving paddle
     for (int i = 0; i < paletteSize; i++) {
       if (i < arkanoid_lives)
         ColorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[3], 100);
@@ -999,19 +999,19 @@ void ArkanoidGame() {
     }
     //______________________
 
-    //elementy zniszczalne
+    //destroyable elements
     for (int i = 0; i < DIODE_COUNT; i++) {
       if (snakeSgt[i][0] > 0)
         ColorSingle(i, colors[colorsRGB[snakeSgt[i][0] - 1]], 25);
     }
     //______________________
 
-    //poruszanie pileczki
+    //movement of ball
     int actPosition = (int)(ballPosition[1] + 0.5f) * COLUMNS + (int)(ballPosition[0] + 0.5f);
     int nextPosition = (int)(ballPosition[1] + ballDirection[1] * ballSpeed + 0.5f) * COLUMNS + (int)(ballPosition[0] + ballDirection[0] * ballSpeed + 0.5f);
-    ColorSingle(actPosition, colors[0], 100);  //zamalowywanie poprzedniej
+    ColorSingle(actPosition, colors[0], 100);  //remove last position of ball
 
-    if (snakeSgt[nextPosition][0] == 0 && arkanoid_mode == 1) {  //czy nie najeżdżam na statyczny obiekt po odbiciu
+    if (snakeSgt[nextPosition][0] == 0 && arkanoid_mode == 1) {  //checking if bouncing of the static elements
       ballPosition[0] += ballDirection[0] * ballSpeed;
       ballPosition[1] += ballDirection[1] * ballSpeed;
 
@@ -1034,33 +1034,33 @@ void ArkanoidGame() {
       return;
     }
 
-    //czy uderzam w klocki zniszczalne
+    //checking if touching destroyable elements
 
-    //zabezpieczenie przed wyjscie poza tablicę, bo czasami nawet gry przełączał
+    //protection of going outside array (unexpected memory override problems)
     int bounce = max(min(actPosition + 1, DIODE_COUNT - 1), 0);
-    if (snakeSgt[bounce][0] > 0 && ballDirection[0] > 0) {  //prawo odbicie
+    if (snakeSgt[bounce][0] > 0 && ballDirection[0] > 0) {  //right bounce
       snakeSgt[bounce][0]--;
       ColorSingle(bounce, colors[0], 100);
       ballDirection[0] = -ballDirection[0];
     } else {
       bounce = max(min(actPosition - 1, DIODE_COUNT - 1), 0);
-      if (snakeSgt[bounce][0] > 0 && ballDirection[0] < 0) {  //lewo odbicie
+      if (snakeSgt[bounce][0] > 0 && ballDirection[0] < 0) {  //left bounce
         snakeSgt[bounce][0]--;
         ColorSingle(bounce, colors[0], 100);
         ballDirection[0] = -ballDirection[0];
       } else {
         bounce = max(min(actPosition + COLUMNS, DIODE_COUNT - 1), 0);
-        if (snakeSgt[bounce][0] > 0 && ballDirection[1] > 0) {  //dół odbicie
+        if (snakeSgt[bounce][0] > 0 && ballDirection[1] > 0) {  //bottom bounce
           snakeSgt[bounce][0]--;
           ColorSingle(bounce, colors[0], 100);
           ballDirection[1] = -ballDirection[1];
         } else {
           bounce = max(min(actPosition - COLUMNS, DIODE_COUNT - 1), 0);
-          if (snakeSgt[bounce][0] > 0 && ballDirection[1] < 0) {  //góra odbicie
+          if (snakeSgt[bounce][0] > 0 && ballDirection[1] < 0) {  //top bounce
             snakeSgt[bounce][0]--;
             ColorSingle(bounce, colors[0], 100);
             ballDirection[1] = -ballDirection[1];
-          } else {  //dowolne uderzenie po przekątnej (rzadka sprawa)
+          } else {  //any bounce on diagonal (a rare thing)
             nextPosition = (int)(ballPosition[1] + ballDirection[1] * ballSpeed + 0.5f) * COLUMNS + (int)(ballPosition[0] + ballDirection[0] * ballSpeed + 0.5f);
             nextPosition = max(min(nextPosition, DIODE_COUNT - 1), 0);
             if (snakeSgt[nextPosition][0] > 0) {
@@ -1074,7 +1074,7 @@ void ArkanoidGame() {
       }
     }
 
-    //Odbicie od paletki
+    //bounce of paddle
     if (ballDirection[1] > 0) {
       for (int i = 0; i < paletteSize; i++) {
         if (actPosition + COLUMNS == (ROWS - 1) * COLUMNS + palettePos + i) {
@@ -1105,7 +1105,7 @@ void ResetTetris() {
   tetris_mode = 0;
   tetris_score = 0;
 
-  for (int i = 0; i < ROWS; i++)  //pionowa niebieska kreska oddzielajaca gre
+  for (int i = 0; i < ROWS; i++)  //vertical blue line separating game area
     ColorSingle(i * COLUMNS + tetris_game_width, colors[1], 100);
 
   tetrisGameDelay = maxTetrisGameDelay;
@@ -1140,7 +1140,7 @@ void DrawAnyFigure(int myFigPosX = -10, int myFigPosY = -10, int myFigRot = -1, 
   if (myFigRot == -1) myFigRot = figureRot;
   if (thisFigure == -1) thisFigure = actualFigure;
 
-  for (int i = 0; i < 4; i++) {  //zamaluj kwadrat 4 na 4 na czarno
+  for (int i = 0; i < 4; i++) {  //paint black 4 x 4 square
     for (int j = 0; j < 4; j++) {
       ColorSingle((myFigPosY + i) * COLUMNS + myFigPosX + j, colors[0], 100);
     }
@@ -1155,7 +1155,7 @@ void DrawAnyFigure(int myFigPosX = -10, int myFigPosY = -10, int myFigRot = -1, 
 bool CheckFigurePossibility(int myFigPosX, int myFigPosY, int myFigRot) {
   for (int i = 0; i < 4; i++) {
     int figureBlockPos = GetFigureBlockPos(i, myFigPosX, myFigPosY, myFigRot);
-    if ((figureBlockPos % COLUMNS) < 0 || (figureBlockPos % COLUMNS) >= tetris_game_width || (figureBlockPos / COLUMNS) >= ROWS || snakeSgt[figureBlockPos][0] != 0) {  //jezeli blok to juz wyjechanie za mape lub blok zawiera juz inny blok
+    if ((figureBlockPos % COLUMNS) < 0 || (figureBlockPos % COLUMNS) >= tetris_game_width || (figureBlockPos / COLUMNS) >= ROWS || snakeSgt[figureBlockPos][0] != 0) {  //check if figure is outside game area or figure is inside another figure
       return false;
     }
   }
@@ -1177,7 +1177,7 @@ void RotateTetrisFigure(int dir)  //1 - clockwise  -1 - counter clockwise
     newRot = 3;
 
   if (dir == 1) {
-    if (actualFigure == 0)  //jezeli linia
+    if (actualFigure == 0)  //if blocks of figure are in whole line (scoring point)
     {
       for (int i = 0; i < wallKicksAmount; i++) {
         newPosX = figurePosX + iWallKicksClockwise[figureRot][i][0];
@@ -1204,7 +1204,7 @@ void RotateTetrisFigure(int dir)  //1 - clockwise  -1 - counter clockwise
       }
     }
   } else {
-    if (actualFigure == 0)  //jezeli linia
+    if (actualFigure == 0)  //if blocks of figure are in whole line (scoring point)
     {
       for (int i = 0; i < wallKicksAmount; i++) {
         newPosX = figurePosX + iWallKicksCounterClockwise[figureRot][i][0];
@@ -1241,7 +1241,7 @@ void MoveTetrisLeftRight(int dir) {
 
       for (int i = 0; i < 4; i++) {
         int figureBlockPos = GetFigureBlockPos(i);
-        if ((figureBlockPos % COLUMNS) + dir < 0 || (figureBlockPos % COLUMNS) + dir >= tetris_game_width || snakeSgt[figureBlockPos + dir][0] != 0) {  //jezeli blok w bok to juz wyjechanie za mape lub blok w bok zawiera juz inny blok
+        if ((figureBlockPos % COLUMNS) + dir < 0 || (figureBlockPos % COLUMNS) + dir >= tetris_game_width || snakeSgt[figureBlockPos + dir][0] != 0) {  //check if figure is outside game area or figure is inside another figure
           canMove = false;
           break;
         }
@@ -1297,7 +1297,7 @@ void TetrisGame() {
       actualFigure = nextFigure;
       actualFigureColor = tetris_colors[actualFigure];
       nextFigure = random(0, 7);
-      DrawAnyFigure(tetris_game_width + 3, 2, 0, nextFigure);  //rysuj kolejna figure
+      DrawAnyFigure(tetris_game_width + 3, 2, 0, nextFigure);  //draw another figure
       figurePosX = figurePosXStart;
       figurePosY = 0;
       figureRot = 0;
@@ -1306,7 +1306,7 @@ void TetrisGame() {
       start_block_delay = movement_block_delay;
       DrawFigure(figurePosX, figurePosY);
 
-      if (!CheckFigurePossibility(figurePosX, figurePosY, figureRot)) {  //jezeli na spawnie juz jest w bloku to koniec gry
+      if (!CheckFigurePossibility(figurePosX, figurePosY, figureRot)) {  //if spawning figure in another existing figure then it means it is end of the game
         tetris_mode = -1;
       }
     }
@@ -1320,20 +1320,20 @@ void TetrisGame() {
     if (block_delay <= 0 && tetris_mode == 1) {
       for (int i = 0; i < 4; i++) {
         int figureBlockPos = GetFigureBlockPos(i);
-        if (figureBlockPos + COLUMNS > DIODE_COUNT || snakeSgt[figureBlockPos + COLUMNS][0] != 0) {  //jezeli blok nizej to juz wyjechanie za mape lub blok nizej zawiera juz inny blok
+        if (figureBlockPos + COLUMNS > DIODE_COUNT || snakeSgt[figureBlockPos + COLUMNS][0] != 0) {  //check if figure is outside game area or figure is inside another figure when getting down
           randomizeFigure = true;
           break;
         }
       }
 
       if (!randomizeFigure) {
-        figurePosY++;  //ruch bloku w dol
+        figurePosY++;  //down movemnt of figure
         DrawFigure(figurePosX, figurePosY - 1);
         if (start_block_delay > 0)
           block_delay = movement_block_delay;
         else
           block_delay = actual_movement_block_delay;
-      } else {  //jezeli nie moze sie ruszyc to zapisz informacje o kolorze na tablicy i sprawdz czy sa pelne linie
+      } else {  //if figure can't move then save info about colors in array and check full lines for scoring
         int minHeight = 0;
         int maxHeight = 0;
 
@@ -1355,7 +1355,7 @@ void TetrisGame() {
 }
 
 void setup() {
-  pixels.begin();  // Inicjalizacja biblioteki
+  pixels.begin();  //pixels library init
 
   cli();
   PCICR |= 0b00000100;
@@ -1386,7 +1386,7 @@ void loop() {
 
   if (bitRead(flags_oneClick, BTN_LEFT)) {  //left
     if (!isMainOpt) {
-      if (mainOption == FACE_ID) {  //twarz
+      if (mainOption == FACE_ID) {  //Face images
         option--;
         refresh = true;
         if (option < 0)
@@ -1443,7 +1443,7 @@ void loop() {
   }
   if (bitRead(flags_oneClick, BTN_RIGHT)) {  //right
     if (!isMainOpt) {
-      if (mainOption == FACE_ID) {  //twarz
+      if (mainOption == FACE_ID) {  //Face image
         option++;
         refresh = true;
         if (option > 4)
@@ -1499,22 +1499,22 @@ void loop() {
   }
 
   if (bitRead(flags_holdClick, BTN_DOWN)) {
-    if (mainOption == TETRIS_ID) {  //Jezeli klikne sobie przycisk w dol to od razu jade szybko w dol
+    if (mainOption == TETRIS_ID) {  //If holding down button then figure is fastly moving down
       if (block_delay > fast_movement_block_delay && start_block_delay <= 0)
         block_delay = fast_movement_block_delay;
 
       actual_movement_block_delay = fast_movement_block_delay;
     }
   } else {
-    if (mainOption == TETRIS_ID) {  //Jezeli puszcze sobie przycisk w dol to zwalniam
+    if (mainOption == TETRIS_ID) {  //If releasing down button then figure shouldn't move fast anymore
       actual_movement_block_delay = movement_block_delay;
     }
   }
 
-  if (bitRead(flags_oneClick, BTN_1)) {  //btn1 wlacza aplikacje
+  if (bitRead(flags_oneClick, BTN_1)) {  //btn1 starts any application
     if (isMainOpt) {
       isMainOpt = false;
-      refresh = true;  //resetowanie ustawienia sprite
+      refresh = true;  //reset sprite setting
       pixels.clear();
 
       if (mainOption == SNAKE_ID)
@@ -1530,10 +1530,10 @@ void loop() {
         drawGlitchSignsDelay = maxDrawGlitchSignsDelay;
         glitchGlobalDelay = maxGlitchGlobalDelay;
         glitchActive = !glitchActive;
-        isMainOpt = true;  //nie wychodze z opcji
+        isMainOpt = true;  //don't go outside mainMenu
       }
     } else {
-      if (mainOption == TETRIS_ID) {  //lewy guziczek obraca przeciwnie do ruchu wskazowek zegara
+      if (mainOption == TETRIS_ID) {  //left button rotates counterclockwise
         RotateTetrisFigure(-1);
       }
     }
@@ -1564,7 +1564,7 @@ void loop() {
 
   if (bitRead(flags_oneClick, BTN_2)) {  //btn2
     if (!isMainOpt) {
-      if (mainOption == TETRIS_ID) {  //prawy guziczek obraca zgodnie z ruchem wskazowek zegara
+      if (mainOption == TETRIS_ID) {  //right button rotates clockwise
         RotateTetrisFigure(1);
       }
     }
@@ -1587,7 +1587,7 @@ void loop() {
     }
   }
 
-  if (bitRead(flags_holdClick, BTN_2) && bitRead(flags_holdClick, BTN_LEFT) && bitRead(flags_holdClick, BTN_RIGHT)) {  //btn1, btn2 oraz btn_up przytrzymane na raz wylaczaja aplikacje
+  if (bitRead(flags_holdClick, BTN_2) && bitRead(flags_holdClick, BTN_LEFT) && bitRead(flags_holdClick, BTN_RIGHT)) {  //btn1, btn2 and btn_up holded all together quit any application
     if (!isMainOpt && (mainOption >= MIN_OPTION && mainOption <= MAX_OPTION))
       isMainOpt = true;
   }
@@ -1642,7 +1642,7 @@ ISR(PCINT2_vect) {
   refresh = true;
   unsigned long currentMillis = millis();
 
-  //buttony na click
+  //buttons for click
   if (!bitRead(switches, BTN_LEFT) && ((lastIntMillis[BTN_LEFT] + DEBOUNCE_TIME) < currentMillis))  //left
   {
     bitSet(flags_oneClick, BTN_LEFT);
@@ -1680,7 +1680,7 @@ ISR(PCINT2_vect) {
   }
 
 
-  //buttony na przytrzymanie
+  //buttons for hold
   if (!bitRead(switches, BTN_LEFT))  //left
     bitSet(flags_holdClick, BTN_LEFT);
   else
@@ -1710,7 +1710,4 @@ ISR(PCINT2_vect) {
     bitSet(flags_holdClick, BTN_2);
   else
     bitClear(flags_holdClick, BTN_2);
-
-  //lastIntMillis = millis();
-  //Serial.println(switches, BIN);
 }
