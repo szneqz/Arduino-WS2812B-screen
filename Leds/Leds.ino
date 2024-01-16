@@ -43,27 +43,34 @@
 unsigned long lastMillis = 0;
 unsigned long calcMillis = 0;
 
+//global information about pixel.show()
+bool isDrawed = false;
+
 //functions delay
 const unsigned long maxBlinkHappyFaceDelay = 20;
 unsigned long blinkHappyFaceDelay = 0;
-const unsigned long maxFireAnimatedDelay = 35;
+const unsigned long maxFireAnimatedDelay = 50;
 unsigned long fireAnimatedDelay = 0;
-const unsigned long maxDrawLinesDelay = 20;
+const unsigned long maxDrawLinesDelay = 50;
 unsigned long drawLinesDelay = 0;
-const unsigned long maxSnakeGameDelay = 25;
+const unsigned long maxSnakeGameDelay = 75;
 unsigned long snakeGameDelay = 0;
-const unsigned long maxArkanoidGameDelay = 20;
+const unsigned long maxArkanoidGameDelay = 50;
 unsigned long arkanoidGameDelay = 0;
-const unsigned long maxMoveArkanoidLeftRightDelay = 15;
+const unsigned long maxMoveArkanoidLeftRightDelay = 35;
 unsigned long moveArkanoidLeftRightDelay = 0;
-const unsigned long maxTetrisGameDelay = 20;
+const unsigned long maxTetrisGameDelay = 30;
 unsigned long tetrisGameDelay = 0;
-const unsigned long maxMoveTetrisLeftRightDelay = 30;
+const unsigned long maxMoveTetrisLeftRightDelay = 50;
 unsigned long moveTetrisLeftRightDelay = 0;
 const unsigned long maxDrawGlitchSignsDelay = 20;
 unsigned long drawGlitchSignsDelay = 0;
-const unsigned long maxGlitchGlobalDelay = 5;
+unsigned long maxGlitchGlobalDelay = 500;
 unsigned long glitchGlobalDelay = 0;
+unsigned long maxGlitchGlobalDelayMinValue = 1250;
+unsigned long maxGlitchGlobalDelayMaxValue = 2250;
+const unsigned long maxGlitchDrawFrameDelay = 100;
+unsigned long glitchDrawFrameDelay = 0;
 
 byte sprites[4][30] = {
   { 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000011, 0b00000011, 0b00010010, 0b00010010, 0b01001000,
@@ -345,12 +352,13 @@ int nextColorNr = 1;
 int dir[LINES_AMOUNT] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 //
 
-//Glitcha values
+//Glitch values
 bool glitchActive = false;
 uint32_t glitchBuffer[DIODE_COUNT];
-int maxGlitchDelay = 80;
-int minGlitchDelay = 25;
-int glitchDelay = 50;
+int movGlitchX = 0;
+int movGlitchY = 0;
+int maxGlitchTimes = 3; //randomized by random(1, 4)
+int glitchTimes = 0;
 int miniOk[4][4] = { { 0, 0, 0, 0 }, { 0, 0, 0, 3 }, { 3, 0, 3, 0 }, { 0, 3, 0, 0 } };
 int miniNope[4][4] = { { 5, 0, 0, 5 }, { 0, 5, 5, 0 }, { 0, 5, 5, 0 }, { 5, 0, 0, 5 } };
 //
@@ -461,11 +469,13 @@ void ColorSingleAdd(int nr, int *color, int sat) {
   }
 
   pixels.setPixelColor(tmp, constrain(*(color)*sat / 100 + gColors[2], 0, 255), constrain(*(color + 1) * sat / 100 + gColors[1], 0, 255), constrain(*(color + 2) * sat / 100 + gColors[0], 0, 255));
+  isDrawed = false;
 }
 
 void ColorSingle(int nr, int *color, int sat) {
   int tmp = ((nr / COLUMNS) % 2 == 0) ? ((DIODE_COUNT - 1) - nr) : ((DIODE_COUNT - 1) - COLUMNS * (nr / COLUMNS) - (COLUMNS - 1) + nr % COLUMNS);
   pixels.setPixelColor(tmp, *(color)*sat / 100, *(color + 1) * sat / 100, *(color + 2) * sat / 100);
+  isDrawed = false;
 }
 
 void ColorHEX(byte *sprite, int *color, int sat, int *bgColor, int bgSat, bool useBg = true) {
@@ -478,6 +488,7 @@ void ColorHEX(byte *sprite, int *color, int sat, int *bgColor, int bgSat, bool u
     else if (useBg)
       pixels.setPixelColor(i, *(bgColor)*bgSat / 100, *(bgColor + 1) * bgSat / 100, *(bgColor + 2) * bgSat / 100);
   }
+  isDrawed = false;
 }
 
 float Fract(float x) {
@@ -620,71 +631,74 @@ void DrawGlitchSigns() {
 
 }
 
-void GlitchEverything(int addColorValue, int glitchTimes) {
-  //Fix glitching - it works differently
+void GlitchEverything(int addColorValue) {
   while (glitchGlobalDelay >= maxGlitchGlobalDelay) {
     glitchGlobalDelay -= maxGlitchGlobalDelay;
+    glitchDrawFrameDelay = 0;
+    glitchTimes = 0;
+    maxGlitchTimes = random(1, 5);
 
-    if (glitchDelay <= 0) {
-      for (int times = 0; times < glitchTimes; times++) {
-        int movX = random(-2, 3);
-        int movY = random(-2, 3);
+    maxGlitchGlobalDelay = random(maxGlitchGlobalDelayMinValue, maxGlitchGlobalDelayMaxValue);
 
-        for (int i = 0; i < DIODE_COUNT; i++) {
-          glitchBuffer[i] = pixels.getPixelColor(i);
-        }
-
-        pixels.clear();
-
-        for (int i = 0; i < DIODE_COUNT; i++) {
-          if (glitchBuffer[i] > 0) {
-            int red = constrain((glitchBuffer[i] >> 16 & 0xFF) + addColorValue, 0, 255);
-            int green = constrain((glitchBuffer[i] >> 8 & 0xFF) + addColorValue, 0, 255);
-            int blue = constrain((glitchBuffer[i] & 0xFF) + addColorValue, 0, 255);
-
-            int pos1 = i + movX + COLUMNS * movY;
-            int pos2 = i - movX + COLUMNS * movY;
-            //odd movY shouldn't reflect in vertical
-
-            if ((i / COLUMNS) % 2 == 0) {
-              if (pos1 - 1 > 0 && pos1 - 1 < DIODE_COUNT - 1 && red > 0)
-                pixels.setPixelColor(pos1 - 1, red * 0.5f, 0, 0);
-              if (pos1 > 0 && pos1 < DIODE_COUNT - 1 && green > 0)
-                pixels.setPixelColor(pos1, 0, green * 0.5f, 0);
-              if (pos1 + 1 > 0 && pos1 + 1 < DIODE_COUNT - 1 && blue > 0)
-                pixels.setPixelColor(pos1 + 1, 0, 0, blue * 0.5f);
-            } else {
-              if (pos2 + 1 > 0 && pos2 + 1 < DIODE_COUNT - 1 && red > 0)
-                pixels.setPixelColor(pos2 + 1, red * 0.5f, 0, 0);
-              if (pos2 > 0 && pos2 < DIODE_COUNT - 1 && green > 0)
-                pixels.setPixelColor(pos2, 0, green * 0.5f, 0);
-              if (pos2 - 1 > 0 && pos2 - 1 < DIODE_COUNT - 1 & blue > 0)
-                pixels.setPixelColor(pos2 - 1, 0, 0, blue * 0.5f);
-            }
-          }
-        }
-
-        pixels.show();
-        //delay(100);
-
-        for (int i = 0; i < DIODE_COUNT; i++) {
-          pixels.setPixelColor(i, glitchBuffer[i]);
-        }
-        pixels.show();
-
-        glitchDelay = random(minGlitchDelay, maxGlitchDelay);
-      }
-    } else {
-      glitchDelay--;
-    }
+    isDrawed = false; //force to draw first frame of glitch
   }
 
   glitchGlobalDelay += calcMillis;
+
+    if (glitchTimes < maxGlitchTimes) {
+    while (glitchDrawFrameDelay >= maxGlitchDrawFrameDelay) {
+      glitchDrawFrameDelay -= maxGlitchDrawFrameDelay;
+      movGlitchX = random(-2, 3);
+      movGlitchY = random(-2, 3);
+
+      isDrawed = false; //force to draw frame of glitch
+      
+      glitchTimes++;
+    }
+
+    glitchDrawFrameDelay += calcMillis;
+  }
+
+  if (!isDrawed) {
+    for (int i = 0; i < DIODE_COUNT; i++) {
+      glitchBuffer[i] = pixels.getPixelColor(i);
+    }
+  }
+
+  if (!isDrawed && glitchTimes < maxGlitchTimes) {
+    for (int i = 0; i < DIODE_COUNT; i++) {
+      if (glitchBuffer[i] > 0) {
+        int red = constrain((glitchBuffer[i] >> 16 & 0xFF) + addColorValue, 0, 255);
+        int green = constrain((glitchBuffer[i] >> 8 & 0xFF) + addColorValue, 0, 255);
+        int blue = constrain((glitchBuffer[i] & 0xFF) + addColorValue, 0, 255);
+
+        int pos1 = i + movGlitchX + COLUMNS * movGlitchY;
+        int pos2 = i - movGlitchX + COLUMNS * movGlitchY;
+        //odd movGlitchY shouldn't reflect in vertical
+
+        if ((i / COLUMNS) % 2 == 0) {
+          if (pos1 - 1 > 0 && pos1 - 1 < DIODE_COUNT - 1 && red > 0)
+            pixels.setPixelColor(pos1 - 1, red * 0.5f, 0, 0);
+          if (pos1 > 0 && pos1 < DIODE_COUNT - 1 && green > 0)
+            pixels.setPixelColor(pos1, 0, green * 0.5f, 0);
+          if (pos1 + 1 > 0 && pos1 + 1 < DIODE_COUNT - 1 && blue > 0)
+            pixels.setPixelColor(pos1 + 1, 0, 0, blue * 0.5f);
+        } else {
+          if (pos2 + 1 > 0 && pos2 + 1 < DIODE_COUNT - 1 && red > 0)
+            pixels.setPixelColor(pos2 + 1, red * 0.5f, 0, 0);
+          if (pos2 > 0 && pos2 < DIODE_COUNT - 1 && green > 0)
+            pixels.setPixelColor(pos2, 0, green * 0.5f, 0);
+          if (pos2 - 1 > 0 && pos2 - 1 < DIODE_COUNT - 1 & blue > 0)
+            pixels.setPixelColor(pos2 - 1, 0, 0, blue * 0.5f);
+        }
+      }
+    }
+  }
 }
 
 void DrawLines() {
   while (drawLinesDelay >= maxDrawLinesDelay) {
-    drawLinesDelay -= maxDrawLinesDelay;
+    drawLinesDelay = 0;   //resetting delay value to zero because generating lines delay is non-deterministic
 
     for (int i = 0; i < LINES_AMOUNT; i++) {
       if ((act[i][0] == dest[i][0] && act[i][1] == dest[i][1]) || act[i][0] >= COLUMNS || act[i][0] < 0 || act[i][1] >= ROWS || act[i][1] < 0) {
@@ -751,6 +765,8 @@ void DrawLines() {
 
       pixels.setPixelColor(j, gColors[2] / 2, gColors[1] / 2, gColors[0] / 2);
     }
+
+    isDrawed = false;
   }
 
   drawLinesDelay += calcMillis;
@@ -1422,6 +1438,7 @@ void loop() {
   if (bitRead(flags_oneClick, BTN_UP)) {  //up
     if (isMainOpt) {
       mainOption--;
+      isDrawed = false;
       if (mainOption < MIN_OPTION)
         mainOption = MAX_OPTION;
     } else {
@@ -1479,6 +1496,7 @@ void loop() {
   if (bitRead(flags_oneClick, BTN_DOWN)) {  //down
     if (isMainOpt) {
       mainOption++;
+      isDrawed = false;
       if (mainOption > MAX_OPTION)
         mainOption = MIN_OPTION;
     } else {
@@ -1631,10 +1649,20 @@ void loop() {
       TetrisGame();
   }
 
-  pixels.show();
+  if (glitchActive) {
+    GlitchEverything(10);
+  }
 
-  if (glitchActive)
-    GlitchEverything(10, random(1, 4));
+  if(!isDrawed) {
+    pixels.show();
+    isDrawed = true;
+  }
+
+  if (glitchActive) { //reset screen after glitch
+    for (int i = 0; i < DIODE_COUNT; i++) {
+      pixels.setPixelColor(i, glitchBuffer[i]);
+    }
+  }
 }
 
 ISR(PCINT2_vect) {
