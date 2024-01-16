@@ -53,7 +53,7 @@ const unsigned long maxFireAnimatedDelay = 50;
 unsigned long fireAnimatedDelay = 0;
 const unsigned long maxDrawLinesDelay = 50;
 unsigned long drawLinesDelay = 0;
-const unsigned long maxSnakeGameDelay = 75;
+const unsigned long maxSnakeGameDelay = 100;
 unsigned long snakeGameDelay = 0;
 const unsigned long maxArkanoidGameDelay = 50;
 unsigned long arkanoidGameDelay = 0;
@@ -368,6 +368,7 @@ int snakeSgt[DIODE_COUNT][2];  //shared with arkanoid and tetris
 int head = 0;
 int tail_len = 3;
 int snake_dir = 0;  //0 - right, 1 - down, 2 - left, 3 - up
+int last_snake_dir = 0;  //0 - right, 1 - down, 2 - left, 3 - up
 int fruit_pos[2];
 int snake_mode = 0;    //-1 dead, 0 static, 1 playing
 int snake_delay = 30;
@@ -800,6 +801,7 @@ void ResetSnake() {
   head = 0;
   tail_len = 3;
   snake_dir = 0;                                                       //0 - right, 1 - down, 2 - left, 3 - up
+  last_snake_dir = 0;                                                  //0 - right, 1 - down, 2 - left, 3 - up
   ColorSingle(fruit_pos[1] * COLUMNS + fruit_pos[0], colors[0], 100);  //paint over the previous one
   SpawnFruit();
   snake_mode = 0;  //set static
@@ -834,6 +836,7 @@ void SnakeGame() {
 
       int movX = 0;
       int movY = 0;
+      last_snake_dir = snake_dir;
       switch (snake_dir) {
         case 0: movX = 1; break;
         case 1: movY = 1; break;
@@ -1409,7 +1412,7 @@ void loop() {
           option = 4;
       }
       if (mainOption == SNAKE_ID) {  //SnakeGame
-        if (snake_dir != 0 && snake_mode == 1)
+        if (snake_dir != 0 && last_snake_dir != 0 && snake_mode == 1)
           snake_dir = 2;
         if (snake_mode == 0)
           snake_mode = 1;
@@ -1450,7 +1453,7 @@ void loop() {
       }
 
       if (mainOption == SNAKE_ID) {  //SnakeGame
-        if (snake_dir != 1 && snake_mode == 1)
+        if (snake_dir != 1 && last_snake_dir != 1 && snake_mode == 1)
           snake_dir = 3;
         if (snake_mode == 0)
           snake_mode = 1;
@@ -1467,7 +1470,7 @@ void loop() {
           option = 0;
       }
       if (mainOption == SNAKE_ID) {  //SnakeGame
-        if (snake_dir != 2 && snake_mode == 1)
+        if (snake_dir != 2 && last_snake_dir != 2 && snake_mode == 1)
           snake_dir = 0;
         if (snake_mode == 0)
           snake_mode = 1;
@@ -1507,7 +1510,7 @@ void loop() {
           staticSpriteNr = 0;
       }
       if (mainOption == SNAKE_ID) {  //SnakeGame
-        if (snake_dir != 3 && snake_mode == 1)
+        if (snake_dir != 3 && last_snake_dir != 3 && snake_mode == 1)
           snake_dir = 1;
         if (snake_mode == 0)
           snake_mode = 1;
