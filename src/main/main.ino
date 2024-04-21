@@ -4,7 +4,8 @@
 #define DIODE_COUNT 234
 #define ROWS 13
 #define COLUMNS 18
-#define MAX_OPTION 5
+#define FFT_COLUMNS 16
+#define MAX_OPTION 6
 #define MIN_OPTION 0
 
 #define DEBOUNCE_TIME 50
@@ -24,6 +25,7 @@
 #define ARKANOID_ID 3
 #define TETRIS_ID 4
 #define GLITCH_ID 5
+#define WAVE_ID 6
 
 //SpritesStaticValues
 #define SPRITE_ANIMATED_EYES 0
@@ -289,7 +291,11 @@ byte menuSprites[][30] = {
 
   { 0b11100000, 0b00001000, 0b01000000, 0b00100000, 0b00000010, 0b10001101, 0b00000000, 0b00100100, 0b01000110, 0b11100000,
     0b00000000, 0b00111101, 0b00000000, 0b10000100, 0b00000111, 0b00000000, 0b00000000, 0b10010000, 0b00000000, 0b11011000,
-    0b11000011, 0b00010011, 0b00001001, 0b00100010, 0b00010010, 0b00001000, 0b00000011, 0b00100000, 0b00000000, 0b00000000 }
+    0b11000011, 0b00010011, 0b00001001, 0b00100010, 0b00010010, 0b00001000, 0b00000011, 0b00100000, 0b00000000, 0b00000000 },
+
+  { 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b01000000, 0b00010000, 0b10000000, 
+    0b10100010, 0b00000000, 0b10001010, 0b11110010, 0b01000111, 0b00010001, 0b00000000, 0b01000101, 0b00000000, 0b00001000, 
+    0b00000010, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000 }
 };
 
 byte staticSprites[][30] = {
@@ -1373,7 +1379,32 @@ void TetrisGame() {
   tetrisGameDelay += calcMillis;
 }
 
+void DrawWave()
+{
+  if(calculateFFT())
+  {
+    uint16_t* waveData = getCalculatedFFT();
+
+    int divideValue = 32; //Add changing that divde value to adjust to sorounding world (or calc max, or something :P)
+
+    for(int i = 0; i < FFT_COLUMNS; i++)
+    {
+      waveData[i] = (float)((float)waveData[i] / divideValue) * ROWS + 1;
+      if(waveData[i] >= ROWS)
+        waveData[i] = ROWS - 1;
+
+      for(int j = ROWS - 1; j > waveData[i]; j--)
+        ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[0], 100);
+
+      for(int j = 0; j <= waveData[i]; j++)
+        ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[5], (int)((float)(j) / waveData[i] * 100));
+    }
+  }
+}
+
 void setup() {
+  FFT_setup(A0);
+
   pixels.begin();  //pixels library init
 
   cli();
@@ -1650,6 +1681,9 @@ void loop() {
 
     if (mainOption == TETRIS_ID)
       TetrisGame();
+
+    if (mainOption == WAVE_ID)
+      DrawWave();
   }
 
   if (glitchActive) {
