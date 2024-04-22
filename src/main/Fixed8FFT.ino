@@ -45,6 +45,8 @@ float frequency = 44000; // Actually useless for our test.
 byte *buffer;
 uint8_t data[N];
 uint16_t finalData[FFT_COLUMNS];
+uint16_t volumeCalc;
+double volumeResult;
 
 byte FFTpin;
 
@@ -74,10 +76,15 @@ bool calculateFFT() {
     data[count] = 0;
   count++;
 
+  volumeCalc += data[count];
+
   if(count >= N)
   {
       uint8_t min = 255;
       uint8_t max = 0;
+
+      volumeResult = (double)volumeCalc / N;
+      volumeCalc = 0;
 
       for(int i = 0; i < N; i++)
       {
@@ -109,8 +116,8 @@ bool calculateFFT() {
         if(i <= 4) {finalData[1] += data[i]; continue;}
         if(i <= 6) {finalData[2] += data[i]; continue;}
         if(i <= 8) {finalData[3] += data[i]; continue;}
-        if(i <= 13) {finalData[5] += data[i]; continue;}
         if(i <= 10) {finalData[4] += data[i]; continue;}
+        if(i <= 13) {finalData[5] += data[i]; continue;}
         if(i <= 16) {finalData[6] += data[i]; continue;}
         if(i <= 19) {finalData[7] += data[i]; continue;}
         if(i <= 23) {finalData[8] += data[i]; continue;}
@@ -135,6 +142,11 @@ bool calculateFFT() {
 uint16_t* getCalculatedFFT()
 {
   return finalData;
+}
+
+double getVolume()
+{
+  return volumeResult;
 }
 
 uint8_t fft(int8_t x[], const int size) {

@@ -449,6 +449,9 @@ int start_block_delay = movement_block_delay;
 int tetris_score = 0;
 //
 
+//SOundWaves values
+double lastVolume = 0;
+
 //MainMenu values
 int mainOption = 0;     //MainMenu option
 bool isMainOpt = true;  //if in MainMenu
@@ -1383,21 +1386,26 @@ void DrawWave()
 {
   if(calculateFFT())
   {
-    uint16_t* waveData = getCalculatedFFT();
-
-    int divideValue = 32; //Add changing that divde value to adjust to sorounding world (or calc max, or something :P)
-
-    for(int i = 0; i < FFT_COLUMNS; i++)
+    //Removing static soundWaves when everything is silent
+    lastVolume = (lastVolume + getVolume() * 39) / 40;
+    if(lastVolume > 1)
     {
-      waveData[i] = (float)((float)waveData[i] / divideValue) * ROWS + 1;
-      if(waveData[i] >= ROWS)
-        waveData[i] = ROWS - 1;
+      uint16_t* waveData = getCalculatedFFT();
 
-      for(int j = ROWS - 1; j > waveData[i]; j--)
-        ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[0], 100);
+      int divideValue = 32; //Add changing that divde value to adjust to sorounding world (or calc max, or something :P)
 
-      for(int j = 0; j <= waveData[i]; j++)
-        ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[5], (int)((float)(j) / waveData[i] * 100));
+      for(int i = 0; i < FFT_COLUMNS; i++)
+      {
+        waveData[i] = (float)((float)waveData[i] / divideValue) * ROWS;
+        if(waveData[i] >= ROWS)
+          waveData[i] = ROWS - 1;
+
+        for(int j = ROWS - 1; j > waveData[i]; j--)
+          ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[0], 100);
+
+        for(int j = 0; j <= waveData[i]; j++)
+          ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[5], (int)((float)(j) / waveData[i] * 100));
+      }
     }
   }
 }
@@ -1567,6 +1575,7 @@ void loop() {
     if (isMainOpt) {
       isMainOpt = false;
       refresh = true;  //reset sprite setting
+      isDrawed = false;
       pixels.clear();
 
       if (mainOption == SNAKE_ID)
