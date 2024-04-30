@@ -1715,10 +1715,9 @@ void loop() {
 
   if (refresh && isMainOpt) {
     refresh = false;
-    if (mainOption == GLITCH_ID) DrawGlitchSigns();
     pixels.clear();
     ColorHEX(menuSprites[mainOption], colors[mainOption + 1], 30, colors[0], 2);
-    
+    if (mainOption == GLITCH_ID) DrawGlitchSigns();
   }
 
   if (!isMainOpt) {
