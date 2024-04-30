@@ -8,7 +8,9 @@
 #define MAX_OPTION 6
 #define MIN_OPTION 0
 
-#define DEBOUNCE_TIME 50
+#define BUTTON_DEBOUNCE_MAX (10)
+#define BUTTON_DEBOUNCE_ON (7)
+#define BUTTON_DEBOUNCE_OFF (3)
 
 //buttons
 #define BTN_LEFT 0
@@ -323,9 +325,9 @@ byte staticSprites[][30] = {
 
 //spirte values
 bool refresh = true;  //flag for refreshing image
-int spriteNr = 0;
-int staticSpriteNr = 0;
-int spriteInc = -1;
+int8_t spriteNr = 0;
+int8_t staticSpriteNr = 0;
+int8_t spriteInc = -1;
 int actDelay = 0;
 
 //CatSprite values
@@ -336,9 +338,9 @@ bool blinkLeft = false;
 bool blinkRight = false;
 
 //FireAnimated values
-int fireSpriteNr = 0;
+int8_t fireSpriteNr = 0;
 const int fireMaxSprite = 8;
-const int fireColors[5][3][3] = { { { 248, 56, 0 }, { 248, 184, 0 }, { 248, 216, 120 } },
+const uint8_t fireColors[5][3][3] = { { { 248, 56, 0 }, { 248, 184, 0 }, { 248, 216, 120 } },
                                   { { 0, 120, 0 }, { 88, 216, 84 }, { 216, 248, 120 } },
                                   { { 9, 88, 248 }, { 60, 188, 252 }, { 164, 228, 252 } },
                                   { { 0, 136, 136 }, { 0, 232, 216 }, { 184, 248, 216 } },
@@ -347,61 +349,61 @@ const int fireColors[5][3][3] = { { { 248, 56, 0 }, { 248, 184, 0 }, { 248, 216,
 //SpaceInvaders values
 const int spaceInvadersMaxDelay = 500;
 int spaceInvadersActDelay = spaceInvadersMaxDelay;
-int spaceInvadersState = 0;
+int8_t spaceInvadersState = 0;
 //
 
 //DrawLines values
-int act[LINES_AMOUNT][2] = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
-int dest[LINES_AMOUNT][2] = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
-int colorNr[LINES_AMOUNT] = { 1, 2, 3, 5, 7, 8, 9, 10, 13, 15 };
-int nextColorNr = 1;
-int dir[LINES_AMOUNT] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+int8_t act[LINES_AMOUNT][2] = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
+int8_t dest[LINES_AMOUNT][2] = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
+int8_t colorNr[LINES_AMOUNT] = { 1, 2, 3, 5, 7, 8, 9, 10, 13, 15 };
+int8_t nextColorNr = 1;
+int8_t dir[LINES_AMOUNT] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 //
 
 //Glitch values
 bool glitchActive = false;
 uint32_t glitchBuffer[DIODE_COUNT];
-int movGlitchX = 0;
-int movGlitchY = 0;
-int maxGlitchTimes = 3; //randomized by random(1, 4)
-int glitchTimes = 0;
-int miniOk[4][4] = { { 0, 0, 0, 0 }, { 0, 0, 0, 3 }, { 3, 0, 3, 0 }, { 0, 3, 0, 0 } };
-int miniNope[4][4] = { { 5, 0, 0, 5 }, { 0, 5, 5, 0 }, { 0, 5, 5, 0 }, { 5, 0, 0, 5 } };
+int8_t movGlitchX = 0;
+int8_t movGlitchY = 0;
+int8_t maxGlitchTimes = 3; //randomized by random(1, 4)
+int8_t glitchTimes = 0;
+int8_t miniOk[4][4] = { { 0, 0, 0, 0 }, { 0, 0, 0, 3 }, { 3, 0, 3, 0 }, { 0, 3, 0, 0 } };
+int8_t miniNope[4][4] = { { 5, 0, 0, 5 }, { 0, 5, 5, 0 }, { 0, 5, 5, 0 }, { 5, 0, 0, 5 } };
 //
 
 //SnakeGame values
-int snakeSgt[DIODE_COUNT][2];  //shared with arkanoid and tetris
-int head = 0;
-int tail_len = 3;
-int snake_dir = 0;  //0 - right, 1 - down, 2 - left, 3 - up
-int last_snake_dir = 0;  //0 - right, 1 - down, 2 - left, 3 - up
-int fruit_pos[2];
-int snake_mode = 0;    //-1 dead, 0 static, 1 playing
-int snake_delay = 30;
+int8_t snakeSgt[DIODE_COUNT][2];  //shared with arkanoid and tetris
+int8_t head = 0;
+int8_t tail_len = 3;
+int8_t snake_dir = 0;  //0 - right, 1 - down, 2 - left, 3 - up
+int8_t last_snake_dir = 0;  //0 - right, 1 - down, 2 - left, 3 - up
+int8_t fruit_pos[2];
+int8_t snake_mode = 0;    //-1 dead, 0 static, 1 playing
+int8_t snake_delay = 30;
 bool snake_visible = true;
 //
 
 //ArkanoidGame values
-int paletteSize = 3;
-int palettePosOnStart = (COLUMNS / 2) - (paletteSize / 2) - 1;
-int palettePos = palettePosOnStart;
-int maxPalettePos = COLUMNS - paletteSize;
+int8_t paletteSize = 3;
+int8_t palettePosOnStart = (COLUMNS / 2) - (paletteSize / 2) - 1;
+int8_t palettePos = palettePosOnStart;
+int8_t maxPalettePos = COLUMNS - paletteSize;
 float ballPosition[2];
 float ballDirection[2];
 float ballSpeed = 0.45f;
-int arkanoid_mode = 0;  //-1 dead, 0 static, 1 playing
-int arkanoid_lives = 3;
-int max_respawn_time = 40;
-int respawn_time = 0;
+int8_t arkanoid_mode = 0;  //-1 dead, 0 static, 1 playing
+int8_t arkanoid_lives = 3;
+int8_t max_respawn_time = 40;
+int8_t respawn_time = 0;
 //
 
 //TetrisGame values
-int figurePosX = 0;
-int figurePosY = 0;
-const int figurePosXStart = 3;
-int figureRot = 0;  //4 rotations
-int tetris_colors[7] = { 2, 5, 3, 1, 14, 6, 4 };
-int figures[7][4][4] = {
+int8_t figurePosX = 0;
+int8_t figurePosY = 0;
+const int8_t figurePosXStart = 3;
+int8_t figureRot = 0;  //4 rotations
+int8_t tetris_colors[7] = { 2, 5, 3, 1, 14, 6, 4 };
+int8_t figures[7][4][4] = {
   { { 4, 5, 6, 7 }, { 2, 6, 10, 14 }, { 8, 9, 10, 11 }, { 1, 5, 9, 13 } },  // line
   { { 0, 1, 5, 6 }, { 2, 5, 6, 9 }, { 4, 5, 9, 10 }, { 1, 4, 5, 8 } },      // Z
   { { 1, 2, 4, 5 }, { 1, 5, 6, 10 }, { 5, 6, 8, 9 }, { 0, 4, 5, 9 } },      // Z reversed
@@ -410,42 +412,42 @@ int figures[7][4][4] = {
   { { 1, 4, 5, 6 }, { 1, 5, 6, 9 }, { 4, 5, 6, 9 }, { 1, 4, 5, 9 } },       // |-
   { { 1, 2, 5, 6 }, { 1, 2, 5, 6 }, { 1, 2, 5, 6 }, { 1, 2, 5, 6 } }        // square
 };
-const int wallKicksAmount = 5;
-int regularWallKicksClockwise[4][5][2] = {
+const int8_t wallKicksAmount = 5;
+int8_t regularWallKicksClockwise[4][5][2] = {
   { { 0, 0 }, { -1, 0 }, { -1, -1 }, { 0, 2 }, { -1, 2 } },  //0>>1
   { { 0, 0 }, { 1, 0 }, { 1, 1 }, { 0, -2 }, { 1, -2 } },    //1>>2
   { { 0, 0 }, { 1, 0 }, { 1, -1 }, { 0, 2 }, { 1, 2 } },     //2>>3
   { { 0, 0 }, { -1, 0 }, { -1, 1 }, { 0, -2 }, { -1, -2 } }  //3>>0
 };
-int regularWallKicksCounterClockwise[4][5][2] = {
+int8_t regularWallKicksCounterClockwise[4][5][2] = {
   { { 0, 0 }, { 1, 0 }, { 1, -1 }, { 0, 2 }, { 1, 2 } },     //0>>3
   { { 0, 0 }, { 1, 0 }, { 1, 1 }, { 0, -2 }, { 1, -2 } },    //1>>0
   { { 0, 0 }, { -1, 0 }, { -1, -1 }, { 0, 2 }, { -1, 2 } },  //2>>1
   { { 0, 0 }, { -1, 0 }, { -1, 1 }, { 0, -2 }, { -1, -2 } }  //3>>2
 };
-int iWallKicksClockwise[4][5][2]{
+int8_t iWallKicksClockwise[4][5][2]{
   { { 0, 0 }, { -2, 0 }, { 1, 0 }, { -2, 1 }, { 1, -2 } },  //0>>1
   { { 0, 0 }, { -1, 0 }, { 2, 0 }, { -1, -2 }, { 2, 1 } },  //1>>2
   { { 0, 0 }, { 2, 0 }, { -1, 0 }, { 2, -1 }, { -1, 2 } },  //2>>3
   { { 0, 0 }, { 1, 0 }, { -2, 0 }, { 1, 2 }, { -2, -1 } }   //3>>0
 };
-int iWallKicksCounterClockwise[4][5][2]{
+int8_t iWallKicksCounterClockwise[4][5][2]{
   { { 0, 0 }, { -1, 0 }, { 2, 0 }, { -1, -2 }, { 2, 1 } },  //0>>3
   { { 0, 0 }, { 2, 0 }, { -1, 0 }, { 2, -1 }, { -1, 2 } },  //1>>0
   { { 0, 0 }, { 1, 0 }, { -2, 0 }, { 1, 2 }, { -2, -1 } },  //2>>1
   { { 0, 0 }, { -2, 0 }, { 1, 0 }, { -2, 1 }, { 1, -2 } }   //3>>2
 };
-int nextFigure = 0;
-int actualFigure = 0;
-int actualFigureColor = 0;
+int8_t nextFigure = 0;
+int8_t actualFigure = 0;
+int8_t actualFigureColor = 0;
 bool randomizeFigure = false;      //if create new random figure
-const int tetris_game_width = 10;  //standard game width
-int tetris_mode = 0;               //-1 dead, 0 static, 1 playing
-const int fast_movement_block_delay = 1;
-const int movement_block_delay = 20;
-int actual_movement_block_delay = movement_block_delay;
-int block_delay = movement_block_delay;
-int start_block_delay = movement_block_delay;
+const int8_t tetris_game_width = 10;  //standard game width
+int8_t tetris_mode = 0;               //-1 dead, 0 static, 1 playing
+const int8_t fast_movement_block_delay = 1;
+const int8_t movement_block_delay = 20;
+int8_t actual_movement_block_delay = movement_block_delay;
+int8_t block_delay = movement_block_delay;
+int8_t start_block_delay = movement_block_delay;
 int tetris_score = 0;
 //
 
@@ -458,22 +460,23 @@ bool isMainOpt = true;  //if in MainMenu
 int option = 0;         //application menu option
 byte flags_oneClick = 0b00000000;
 byte flags_holdClick = 0b00000000;
+uint8_t buttonCount[6] = {0, 0, 0, 0, 0, 0};
 //
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(DIODE_COUNT, PIN, NEO_GRB + NEO_KHZ800);
 
 byte switches = 0;  //left, up, right, down, btn1, btn2
 unsigned long lastIntMillis[6] = { 0, 0, 0, 0, 0, 0 };
-int colors[16][3] = { { 0, 0, 0 }, { 0, 0, 255 }, { 0, 128, 128 }, { 0, 255, 0 }, { 128, 128, 0 }, { 255, 0, 0 }, { 128, 0, 128 }, { 85, 85, 85 }, { 51, 102, 102 }, { 102, 51, 102 }, { 102, 102, 51 }, { 0, 85, 170 }, { 0, 170, 85 }, { 85, 170, 0 }, { 170, 85, 0 }, { 170, 0, 85 } };
-int colorsRGB[3] = { 1, 3, 5 };
+uint8_t colors[16][3] = { { 0, 0, 0 }, { 0, 0, 255 }, { 0, 128, 128 }, { 0, 255, 0 }, { 128, 128, 0 }, { 255, 0, 0 }, { 128, 0, 128 }, { 85, 85, 85 }, { 51, 102, 102 }, { 102, 51, 102 }, { 102, 102, 51 }, { 0, 85, 170 }, { 0, 170, 85 }, { 85, 170, 0 }, { 170, 85, 0 }, { 170, 0, 85 } };
+int8_t colorsRGB[3] = { 1, 3, 5 };
 
-void ColorSingleAdd(int nr, int *color, int sat) {
-  int tmp = ((nr / COLUMNS) % 2 == 0) ? ((DIODE_COUNT - 1) - nr) : ((DIODE_COUNT - 1) - COLUMNS * (nr / COLUMNS) - (COLUMNS - 1) + nr % COLUMNS);
+void ColorSingleAdd(uint8_t nr, uint8_t *color, uint8_t sat) {
+  uint8_t tmp = ((nr / COLUMNS) % 2 == 0) ? ((DIODE_COUNT - 1) - nr) : ((DIODE_COUNT - 1) - COLUMNS * (nr / COLUMNS) - (COLUMNS - 1) + nr % COLUMNS);
 
   unsigned long gColor = pixels.getPixelColor(tmp);
   byte gColors[3] = { 0, 0, 0 };
-  for (int j = 0; j < 3; j++) {
-    for (int k = 0; k < 8; k++) {
+  for (uint8_t j = 0; j < 3; j++) {
+    for (uint8_t k = 0; k < 8; k++) {
       bitWrite(gColors[j], k, bitRead(gColor, j * 8 + k));
     }
   }
@@ -482,17 +485,17 @@ void ColorSingleAdd(int nr, int *color, int sat) {
   isDrawed = false;
 }
 
-void ColorSingle(int nr, int *color, int sat) {
-  int tmp = ((nr / COLUMNS) % 2 == 0) ? ((DIODE_COUNT - 1) - nr) : ((DIODE_COUNT - 1) - COLUMNS * (nr / COLUMNS) - (COLUMNS - 1) + nr % COLUMNS);
+void ColorSingle(uint8_t nr, uint8_t *color, uint8_t sat) {
+  uint8_t tmp = ((nr / COLUMNS) % 2 == 0) ? ((DIODE_COUNT - 1) - nr) : ((DIODE_COUNT - 1) - COLUMNS * (nr / COLUMNS) - (COLUMNS - 1) + nr % COLUMNS);
   pixels.setPixelColor(tmp, *(color)*sat / 100, *(color + 1) * sat / 100, *(color + 2) * sat / 100);
   isDrawed = false;
 }
 
-void ColorHEX(byte *sprite, int *color, int sat, int *bgColor, int bgSat, bool useBg = true) {
-  for (int i = 0; i < DIODE_COUNT; i++) {
-    int tmp = ((i / COLUMNS) % 2 == 0) ? ((DIODE_COUNT - 1) - i) : ((DIODE_COUNT - 1) - COLUMNS * (i / COLUMNS) - (COLUMNS - 1) + i % COLUMNS);
-    int tmp2 = tmp / 8;
-    int tmp3 = tmp % 8;
+void ColorHEX(byte *sprite, uint8_t *color, uint8_t sat, uint8_t *bgColor, uint8_t bgSat, bool useBg = true) {
+  for (uint8_t i = 0; i < DIODE_COUNT; i++) {
+    uint8_t tmp = ((i / COLUMNS) % 2 == 0) ? ((DIODE_COUNT - 1) - i) : ((DIODE_COUNT - 1) - COLUMNS * (i / COLUMNS) - (COLUMNS - 1) + i % COLUMNS);
+    uint8_t tmp2 = tmp / 8;
+    uint8_t tmp3 = tmp % 8;
     if (bitRead(*(sprite + tmp2), tmp3))
       pixels.setPixelColor(i, *(color)*sat / 100, *(color + 1) * sat / 100, *(color + 2) * sat / 100);
     else if (useBg)
@@ -509,13 +512,13 @@ float Mix(float a, float b, float t) {
   return a + (b - a) * t;
 }
 
-void HSVtoRGB(float h, float s, float v, int *rgb) {
+void HSVtoRGB(float h, float s, float v, uint8_t *rgb) {
   rgb[0] = v * Mix(1.0, constrain(abs(Fract(h + 1.0) * 6.0 - 3.0) - 1.0, 0.0, 1.0), s) * 255;
   rgb[1] = v * Mix(1.0, constrain(abs(Fract(h + 0.6666666) * 6.0 - 3.0) - 1.0, 0.0, 1.0), s) * 255;
   rgb[2] = v * Mix(1.0, constrain(abs(Fract(h + 0.3333333) * 6.0 - 3.0) - 1.0, 0.0, 1.0), s) * 255;
 }
 
-void BlinkingEyes(int nrColor) {  //blinking eyes with random frequency
+void BlinkingEyes(uint8_t nrColor) {  //blinking eyes with random frequency
   if (actDelay <= 0) {
     refresh = true;
     if (spriteNr % 3 == 0)
@@ -537,8 +540,8 @@ void BlinkingEyes(int nrColor) {  //blinking eyes with random frequency
 
 void ColorfulCat() {
   if (refresh) {
-    int offset = 0;
-    int blinkOffset = 0;
+    uint8_t offset = 0;
+    uint8_t blinkOffset = 0;
 
     if (isHappy)
       offset = 3;
@@ -566,7 +569,7 @@ void BlinkHappyFace() {
   while (blinkHappyFaceDelay >= maxBlinkHappyFaceDelay) {
     blinkHappyFaceDelay -= maxBlinkHappyFaceDelay;
 
-    int offset = 0;
+    uint8_t offset = 0;
     if (blinkLeft)
       offset = 1;
     if (blinkRight)
@@ -596,7 +599,7 @@ void FireAnimated() {
   fireAnimatedDelay += calcMillis;
 }
 
-void SpaceInvaders(int spaceInvaderNr) {
+void SpaceInvaders(uint8_t spaceInvaderNr) {
   if (spaceInvadersActDelay <= 0) {
     if (spaceInvadersState == 0)
       spaceInvadersState = 1;
@@ -613,7 +616,7 @@ void SpaceInvaders(int spaceInvaderNr) {
 
 void StaticSprite() {
   if (refresh) {
-    int actSprite = staticSpriteNr - SPRITE_STATIC;
+    uint8_t actSprite = staticSpriteNr - SPRITE_STATIC;
     ColorHEX(staticSprites[actSprite], colors[option + 1], 30, colors[0], 2);
     refresh = false;
   }
@@ -623,15 +626,15 @@ void DrawGlitchSigns() {
   while (drawGlitchSignsDelay >= maxDrawGlitchSignsDelay) {
     drawGlitchSignsDelay -= maxDrawGlitchSignsDelay;
 
-    int *miniSprite;
+    int8_t *miniSprite;
 
     if (glitchActive)
-      miniSprite = (int *)miniOk;
+      miniSprite = (int8_t *)miniOk;
     else
-      miniSprite = (int *)miniNope;
+      miniSprite = (int8_t *)miniNope;
 
-    for (int i = 0; i < 4; i++) {
-      for (int j = 0; j < 4; j++) {
+    for (int8_t i = 0; i < 4; i++) {
+      for (int8_t j = 0; j < 4; j++) {
         ColorSingle((ROWS - 5) * COLUMNS + i * COLUMNS + j, colors[*(miniSprite + i * 4 + j)], 100);
       }
     }
@@ -641,7 +644,7 @@ void DrawGlitchSigns() {
 
 }
 
-void GlitchEverything(int addColorValue) {
+void GlitchEverything(int8_t addColorValue) {
   while (glitchGlobalDelay >= maxGlitchGlobalDelay) {
     glitchGlobalDelay -= maxGlitchGlobalDelay;
     glitchDrawFrameDelay = 0;
@@ -670,20 +673,20 @@ void GlitchEverything(int addColorValue) {
   }
 
   if (!isDrawed) {
-    for (int i = 0; i < DIODE_COUNT; i++) {
+    for (uint8_t i = 0; i < DIODE_COUNT; i++) {
       glitchBuffer[i] = pixels.getPixelColor(i);
     }
   }
 
   if (!isDrawed && glitchTimes < maxGlitchTimes) {
-    for (int i = 0; i < DIODE_COUNT; i++) {
+    for (uint8_t i = 0; i < DIODE_COUNT; i++) {
       if (glitchBuffer[i] > 0) {
-        int red = constrain((glitchBuffer[i] >> 16 & 0xFF) + addColorValue, 0, 255);
-        int green = constrain((glitchBuffer[i] >> 8 & 0xFF) + addColorValue, 0, 255);
-        int blue = constrain((glitchBuffer[i] & 0xFF) + addColorValue, 0, 255);
+        uint8_t red = constrain((glitchBuffer[i] >> 16 & 0xFF) + addColorValue, 0, 255);
+        uint8_t green = constrain((glitchBuffer[i] >> 8 & 0xFF) + addColorValue, 0, 255);
+        uint8_t blue = constrain((glitchBuffer[i] & 0xFF) + addColorValue, 0, 255);
 
-        int pos1 = i + movGlitchX + COLUMNS * movGlitchY;
-        int pos2 = i - movGlitchX + COLUMNS * movGlitchY;
+        uint8_t pos1 = i + movGlitchX + COLUMNS * movGlitchY;
+        uint8_t pos2 = i - movGlitchX + COLUMNS * movGlitchY;
         //odd movGlitchY shouldn't reflect in vertical
 
         if ((i / COLUMNS) % 2 == 0) {
@@ -710,7 +713,7 @@ void DrawLines() {
   while (drawLinesDelay >= maxDrawLinesDelay) {
     drawLinesDelay = 0;   //resetting delay value to zero because generating lines delay is non-deterministic
 
-    for (int i = 0; i < LINES_AMOUNT; i++) {
+    for (uint8_t i = 0; i < LINES_AMOUNT; i++) {
       if ((act[i][0] == dest[i][0] && act[i][1] == dest[i][1]) || act[i][0] >= COLUMNS || act[i][0] < 0 || act[i][1] >= ROWS || act[i][1] < 0) {
         nextColorNr++;
         if (nextColorNr >= 16)
@@ -764,11 +767,11 @@ void DrawLines() {
       ColorSingleAdd(act[i][1] * COLUMNS + act[i][0], colors[colorNr[i]], 100);
     }
 
-    for (int j = 0; j < DIODE_COUNT; j++) {
+    for (uint8_t j = 0; j < DIODE_COUNT; j++) {
       unsigned long gColor = pixels.getPixelColor(j);
       byte gColors[3] = { 0, 0, 0 };
-      for (int k = 0; k < 3; k++) {
-        for (int l = 0; l < 8; l++) {
+      for (uint8_t k = 0; k < 3; k++) {
+        for (uint8_t l = 0; l < 8; l++) {
           bitWrite(gColors[k], l, bitRead(gColor, k * 8 + l));
         }
       }
@@ -791,7 +794,7 @@ void SpawnFruit() {
     fruit_pos[0] = random() % COLUMNS;
     fruit_pos[1] = random() % ROWS;
 
-    for (int i = 0; i < tail_len; i++) {
+    for (uint8_t i = 0; i < tail_len; i++) {
       if (snakeSgt[i][0] == fruit_pos[0] && snakeSgt[i][1] == fruit_pos[1]) {
         isGood = false;
         break;
@@ -801,8 +804,8 @@ void SpawnFruit() {
 }
 
 void ResetSnake() {
-  snakeSgt[0][0] = (int)(COLUMNS / 2);
-  snakeSgt[0][1] = (int)(ROWS / 2);
+  snakeSgt[0][0] = (uint8_t)(COLUMNS / 2);
+  snakeSgt[0][1] = (uint8_t)(ROWS / 2);
   snakeSgt[1][0] = snakeSgt[0][0] - 1;
   snakeSgt[1][1] = snakeSgt[0][1];
   snakeSgt[2][0] = snakeSgt[1][0] - 1;
@@ -817,7 +820,7 @@ void ResetSnake() {
   snake_delay = 30;
   snake_visible = true;
 
-  for (int i = 0; i < tail_len; i++)
+  for (uint8_t i = 0; i < tail_len; i++)
     ColorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[1], 100);
 
   snakeGameDelay = maxSnakeGameDelay; //reset snake timer
@@ -829,7 +832,7 @@ void SnakeGame() {
 
     if (snake_mode == 1) {
       //save previous head position
-      int prevHead[2];
+      uint8_t prevHead[2];
       prevHead[0] = snakeSgt[head][0];
       prevHead[1] = snakeSgt[head][1];
 
@@ -839,12 +842,12 @@ void SnakeGame() {
         head = tail_len - 1;
 
       //save previous tail position
-      int prevTail[2];
+      uint8_t prevTail[2];
       prevTail[0] = snakeSgt[head][0];
       prevTail[1] = snakeSgt[head][1];
 
-      int movX = 0;
-      int movY = 0;
+      int8_t movX = 0;
+      int8_t movY = 0;
       last_snake_dir = snake_dir;
       switch (snake_dir) {
         case 0: movX = 1; break;
@@ -867,13 +870,13 @@ void SnakeGame() {
         snakeSgt[head][1] = 0;
 
       if (snake_visible) {
-        for (int i = 0; i < tail_len; i++) {  //draw snake
-          int tmpColor[3];
+        for (uint8_t i = 0; i < tail_len; i++) {  //draw snake
+          uint8_t tmpColor[3];
           HSVtoRGB((float)i / tail_len, 1, 1, tmpColor);
           ColorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], tmpColor, 50);
         }
       } else {
-        for (int i = 0; i < tail_len; i++)  //remove snake
+        for (uint8_t i = 0; i < tail_len; i++)  //remove snake
           ColorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[0], 100);
       }
 
@@ -884,7 +887,7 @@ void SnakeGame() {
         tail_len++;
         SpawnFruit();
 
-        for (int i = tail_len; i > head; i--) {
+        for (uint8_t i = tail_len; i > head; i--) {
           snakeSgt[i][0] = snakeSgt[i - 1][0];
           snakeSgt[i][1] = snakeSgt[i - 1][1];
         }
@@ -896,7 +899,7 @@ void SnakeGame() {
       }
 
       //death when crashing into itself
-      for (int i = 0; i < tail_len; i++) {
+      for (uint8_t i = 0; i < tail_len; i++) {
         if (i == head)
           continue;
         if (snakeSgt[head][0] == snakeSgt[i][0] && snakeSgt[head][1] == snakeSgt[i][1]) {
@@ -908,13 +911,13 @@ void SnakeGame() {
       ColorSingle(prevTail[1] * COLUMNS + prevTail[0], colors[0], 100);  //remove segments on previeous position of tail
     } else {
       if (snake_visible) {
-        for (int i = 0; i < tail_len; i++) {  //draw snake
-          int tmpColor[3];
+        for (uint8_t i = 0; i < tail_len; i++) {  //draw snake
+          uint8_t tmpColor[3];
           HSVtoRGB((float)i / tail_len, 1, 1, tmpColor);
           ColorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], tmpColor, 50);
         }
       } else {
-        for (int i = 0; i < tail_len; i++)  //remove snake
+        for (uint8_t i = 0; i < tail_len; i++)  //remove snake
           ColorSingle(snakeSgt[i][1] * COLUMNS + snakeSgt[i][0], colors[0], 100);
       }
       if (snake_mode == -1) {
@@ -954,7 +957,7 @@ void Check45DegAngle(float sidesLength[2]) {
 
 void ResetArkanoidBall() {
   //remove last rendered paddle
-  for (int i = 0; i < paletteSize; i++)
+  for (uint8_t i = 0; i < paletteSize; i++)
     ColorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[0], 100);
 
   palettePos = palettePosOnStart;
@@ -977,26 +980,26 @@ void ResetArkanoid() {
 
   ResetArkanoidBall();
 
-  for (int i = 0; i < DIODE_COUNT; i++)
+  for (uint8_t i = 0; i < DIODE_COUNT; i++)
     snakeSgt[i][0] = 0;
 
-  for (int i = 1; i < COLUMNS - 1; i++)
-    for (int j = 1; j < ROWS / 2; j++)
+  for (uint8_t i = 1; i < COLUMNS - 1; i++)
+    for (uint8_t j = 1; j < ROWS / 2; j++)
       snakeSgt[j * COLUMNS + i][0] = 1;
 
-  for (int i = 2; i < COLUMNS - 2; i++)
-    for (int j = 2; j < ROWS / 2 - 1; j++)
+  for (uint8_t i = 2; i < COLUMNS - 2; i++)
+    for (uint8_t j = 2; j < ROWS / 2 - 1; j++)
       snakeSgt[j * COLUMNS + i][0] = 2;
 
-  for (int i = 3; i < COLUMNS - 3; i++)
-    for (int j = 3; j < ROWS / 2 - 2; j++)
+  for (uint8_t i = 3; i < COLUMNS - 3; i++)
+    for (uint8_t j = 3; j < ROWS / 2 - 2; j++)
       snakeSgt[j * COLUMNS + i][0] = 3;
 
   arkanoidGameDelay = maxArkanoidGameDelay;
   moveArkanoidLeftRightDelay = maxMoveArkanoidLeftRightDelay;
 }
 
-void MoveArkanoidLeftRight(int dir) {
+void MoveArkanoidLeftRight(int8_t dir) {
   while (moveArkanoidLeftRightDelay >= maxMoveArkanoidLeftRightDelay) {
     moveArkanoidLeftRightDelay -= maxMoveArkanoidLeftRightDelay;
 
@@ -1014,12 +1017,12 @@ void ArkanoidGame() {
     arkanoidGameDelay -= maxArkanoidGameDelay;
 
     //black line on bottom
-    for (int i = 0; i < COLUMNS; i++) {
+    for (uint8_t i = 0; i < COLUMNS; i++) {
       ColorSingle((ROWS - 1) * COLUMNS + i, colors[0], 100);
     }
 
     //moving paddle
-    for (int i = 0; i < paletteSize; i++) {
+    for (uint8_t i = 0; i < paletteSize; i++) {
       if (i < arkanoid_lives)
         ColorSingle((ROWS - 1) * COLUMNS + palettePos + i, colors[3], 100);
       else
@@ -1028,15 +1031,15 @@ void ArkanoidGame() {
     //______________________
 
     //destroyable elements
-    for (int i = 0; i < DIODE_COUNT; i++) {
+    for (uint8_t i = 0; i < DIODE_COUNT; i++) {
       if (snakeSgt[i][0] > 0)
         ColorSingle(i, colors[colorsRGB[snakeSgt[i][0] - 1]], 25);
     }
     //______________________
 
     //movement of ball
-    int actPosition = (int)(ballPosition[1] + 0.5f) * COLUMNS + (int)(ballPosition[0] + 0.5f);
-    int nextPosition = (int)(ballPosition[1] + ballDirection[1] * ballSpeed + 0.5f) * COLUMNS + (int)(ballPosition[0] + ballDirection[0] * ballSpeed + 0.5f);
+    uint8_t actPosition = (uint8_t)(ballPosition[1] + 0.5f) * COLUMNS + (uint8_t)(ballPosition[0] + 0.5f);
+    uint8_t nextPosition = (uint8_t)(ballPosition[1] + ballDirection[1] * ballSpeed + 0.5f) * COLUMNS + (uint8_t)(ballPosition[0] + ballDirection[0] * ballSpeed + 0.5f);
     ColorSingle(actPosition, colors[0], 100);  //remove last position of ball
 
     if (snakeSgt[nextPosition][0] == 0 && arkanoid_mode == 1) {  //checking if bouncing of the static elements
@@ -1047,7 +1050,7 @@ void ArkanoidGame() {
       ballPosition[1] = min(max(ballPosition[1], 0.0f), ROWS - 1);
     }
 
-    actPosition = (int)(ballPosition[1] + 0.5f) * COLUMNS + (int)(ballPosition[0] + 0.5f);
+    actPosition = (uint8_t)(ballPosition[1] + 0.5f) * COLUMNS + (uint8_t)(ballPosition[0] + 0.5f);
 
     if (ballPosition[0] <= 0 || ballPosition[0] >= (COLUMNS - 1))
       ballDirection[0] = -ballDirection[0];
@@ -1065,7 +1068,7 @@ void ArkanoidGame() {
     //checking if touching destroyable elements
 
     //protection of going outside array (unexpected memory override problems)
-    int bounce = max(min(actPosition + 1, DIODE_COUNT - 1), 0);
+    uint8_t bounce = max(min(actPosition + 1, DIODE_COUNT - 1), 0);
     if (snakeSgt[bounce][0] > 0 && ballDirection[0] > 0) {  //right bounce
       snakeSgt[bounce][0]--;
       ColorSingle(bounce, colors[0], 100);
@@ -1089,7 +1092,7 @@ void ArkanoidGame() {
             ColorSingle(bounce, colors[0], 100);
             ballDirection[1] = -ballDirection[1];
           } else {  //any bounce on diagonal (a rare thing)
-            nextPosition = (int)(ballPosition[1] + ballDirection[1] * ballSpeed + 0.5f) * COLUMNS + (int)(ballPosition[0] + ballDirection[0] * ballSpeed + 0.5f);
+            nextPosition = (uint8_t)(ballPosition[1] + ballDirection[1] * ballSpeed + 0.5f) * COLUMNS + (uint8_t)(ballPosition[0] + ballDirection[0] * ballSpeed + 0.5f);
             nextPosition = max(min(nextPosition, DIODE_COUNT - 1), 0);
             if (snakeSgt[nextPosition][0] > 0) {
               snakeSgt[nextPosition][0]--;
@@ -1104,7 +1107,7 @@ void ArkanoidGame() {
 
     //bounce of paddle
     if (ballDirection[1] > 0) {
-      for (int i = 0; i < paletteSize; i++) {
+      for (uint8_t i = 0; i < paletteSize; i++) {
         if (actPosition + COLUMNS == (ROWS - 1) * COLUMNS + palettePos + i) {
           ballDirection[1] = -ballDirection[1];
           float center = palettePos + (paletteSize - 1) / 2;
@@ -1125,7 +1128,7 @@ void ArkanoidGame() {
 }
 
 void ResetTetris() {
-  for (int i = 0; i < DIODE_COUNT; i++)
+  for (uint8_t i = 0; i < DIODE_COUNT; i++)
     snakeSgt[i][0] = 0;
 
   randomizeFigure = true;
@@ -1133,14 +1136,14 @@ void ResetTetris() {
   tetris_mode = 0;
   tetris_score = 0;
 
-  for (int i = 0; i < ROWS; i++)  //vertical blue line separating game area
+  for (uint8_t i = 0; i < ROWS; i++)  //vertical blue line separating game area
     ColorSingle(i * COLUMNS + tetris_game_width, colors[1], 100);
 
   tetrisGameDelay = maxTetrisGameDelay;
   moveTetrisLeftRightDelay = maxMoveTetrisLeftRightDelay;
 }
 
-int GetFigureBlockPos(int i, int myFigPosX = -10, int myFigPosY = -10, int myFigRot = -1, int thisFigure = -1) {
+uint8_t GetFigureBlockPos(uint8_t i, int8_t myFigPosX = -10, int8_t myFigPosY = -10, int8_t myFigRot = -1, int8_t thisFigure = -1) {
   if (myFigPosX == -10) myFigPosX = figurePosX;
   if (myFigPosY == -10) myFigPosY = figurePosY;
   if (myFigRot == -1) myFigRot = figureRot;
@@ -1148,41 +1151,41 @@ int GetFigureBlockPos(int i, int myFigPosX = -10, int myFigPosY = -10, int myFig
   return (myFigPosY + (figures[thisFigure][myFigRot][i] / 4)) * COLUMNS + myFigPosX + (figures[thisFigure][myFigRot][i] % 4);
 }
 
-void DrawFigure(int lastPosX, int lastPosY, int lastRot = -1) {
+void DrawFigure(int8_t lastPosX, int8_t lastPosY, int8_t lastRot = -1) {
   if (lastRot == -1) lastRot = figureRot;
 
-  for (int i = 0; i < 4; i++) {
-    int figureBlockPos = GetFigureBlockPos(i, lastPosX, lastPosY, lastRot);
+  for (int8_t i = 0; i < 4; i++) {
+    int8_t figureBlockPos = GetFigureBlockPos(i, lastPosX, lastPosY, lastRot);
     ColorSingle(figureBlockPos, colors[0], 100);
   }
 
-  for (int i = 0; i < 4; i++) {
-    int figureBlockPos = GetFigureBlockPos(i, figurePosX, figurePosY);
+  for (int8_t i = 0; i < 4; i++) {
+    int8_t figureBlockPos = GetFigureBlockPos(i, figurePosX, figurePosY);
     ColorSingle(figureBlockPos, colors[actualFigureColor], 20);
   }
 }
 
-void DrawAnyFigure(int myFigPosX = -10, int myFigPosY = -10, int myFigRot = -1, int thisFigure = -1) {
+void DrawAnyFigure(int8_t myFigPosX = -10, int8_t myFigPosY = -10, int8_t myFigRot = -1, int8_t thisFigure = -1) {
   if (myFigPosX == -10) myFigPosX = figurePosX;
   if (myFigPosY == -10) myFigPosY = figurePosY;
   if (myFigRot == -1) myFigRot = figureRot;
   if (thisFigure == -1) thisFigure = actualFigure;
 
-  for (int i = 0; i < 4; i++) {  //paint black 4 x 4 square
-    for (int j = 0; j < 4; j++) {
+  for (int8_t i = 0; i < 4; i++) {  //paint black 4 x 4 square
+    for (int8_t j = 0; j < 4; j++) {
       ColorSingle((myFigPosY + i) * COLUMNS + myFigPosX + j, colors[0], 100);
     }
   }
 
-  for (int i = 0; i < 4; i++) {
-    int figureBlockPos = GetFigureBlockPos(i, myFigPosX, myFigPosY, myFigRot, thisFigure);
+  for (int8_t i = 0; i < 4; i++) {
+    uint8_t figureBlockPos = GetFigureBlockPos(i, myFigPosX, myFigPosY, myFigRot, thisFigure);
     ColorSingle(figureBlockPos, colors[tetris_colors[thisFigure]], 20);
   }
 }
 
-bool CheckFigurePossibility(int myFigPosX, int myFigPosY, int myFigRot) {
-  for (int i = 0; i < 4; i++) {
-    int figureBlockPos = GetFigureBlockPos(i, myFigPosX, myFigPosY, myFigRot);
+bool CheckFigurePossibility(int8_t myFigPosX, int8_t myFigPosY, int8_t myFigRot) {
+  for (int8_t i = 0; i < 4; i++) {
+    uint8_t figureBlockPos = GetFigureBlockPos(i, myFigPosX, myFigPosY, myFigRot);
     if ((figureBlockPos % COLUMNS) < 0 || (figureBlockPos % COLUMNS) >= tetris_game_width || (figureBlockPos / COLUMNS) >= ROWS || snakeSgt[figureBlockPos][0] != 0) {  //check if figure is outside game area or figure is inside another figure
       return false;
     }
@@ -1190,14 +1193,14 @@ bool CheckFigurePossibility(int myFigPosX, int myFigPosY, int myFigRot) {
   return true;
 }
 
-void RotateTetrisFigure(int dir)  //1 - clockwise  -1 - counter clockwise
+void RotateTetrisFigure(int8_t dir)  //1 - clockwise  -1 - counter clockwise
 {
-  int newRot = figureRot + dir;
-  int newPosX = figurePosX;
-  int newPosY = figurePosY;
-  int lastRot = figureRot;
-  int lastPosX = figurePosX;
-  int lastPosY = figurePosY;
+  int8_t newRot = figureRot + dir;
+  int8_t newPosX = figurePosX;
+  int8_t newPosY = figurePosY;
+  int8_t lastRot = figureRot;
+  int8_t lastPosX = figurePosX;
+  int8_t lastPosY = figurePosY;
 
   if (newRot > 3)
     newRot = 0;
@@ -1207,7 +1210,7 @@ void RotateTetrisFigure(int dir)  //1 - clockwise  -1 - counter clockwise
   if (dir == 1) {
     if (actualFigure == 0)  //if blocks of figure are in whole line (scoring point)
     {
-      for (int i = 0; i < wallKicksAmount; i++) {
+      for (int8_t i = 0; i < wallKicksAmount; i++) {
         newPosX = figurePosX + iWallKicksClockwise[figureRot][i][0];
         newPosY = figurePosY + iWallKicksClockwise[figureRot][i][1];
         if (CheckFigurePossibility(newPosX, newPosY, newRot)) {
@@ -1219,7 +1222,7 @@ void RotateTetrisFigure(int dir)  //1 - clockwise  -1 - counter clockwise
         }
       }
     } else {
-      for (int i = 0; i < wallKicksAmount; i++) {
+      for (int8_t i = 0; i < wallKicksAmount; i++) {
         newPosX = figurePosX + regularWallKicksClockwise[figureRot][i][0];
         newPosY = figurePosY + regularWallKicksClockwise[figureRot][i][1];
         if (CheckFigurePossibility(newPosX, newPosY, newRot)) {
@@ -1234,7 +1237,7 @@ void RotateTetrisFigure(int dir)  //1 - clockwise  -1 - counter clockwise
   } else {
     if (actualFigure == 0)  //if blocks of figure are in whole line (scoring point)
     {
-      for (int i = 0; i < wallKicksAmount; i++) {
+      for (int8_t i = 0; i < wallKicksAmount; i++) {
         newPosX = figurePosX + iWallKicksCounterClockwise[figureRot][i][0];
         newPosY = figurePosY + iWallKicksCounterClockwise[figureRot][i][1];
         if (CheckFigurePossibility(newPosX, newPosY, newRot)) {
@@ -1246,7 +1249,7 @@ void RotateTetrisFigure(int dir)  //1 - clockwise  -1 - counter clockwise
         }
       }
     } else {
-      for (int i = 0; i < wallKicksAmount; i++) {
+      for (int8_t i = 0; i < wallKicksAmount; i++) {
         newPosX = figurePosX + regularWallKicksCounterClockwise[figureRot][i][0];
         newPosY = figurePosY + regularWallKicksCounterClockwise[figureRot][i][1];
         if (CheckFigurePossibility(newPosX, newPosY, newRot)) {
@@ -1261,14 +1264,14 @@ void RotateTetrisFigure(int dir)  //1 - clockwise  -1 - counter clockwise
   }
 }
 
-void MoveTetrisLeftRight(int dir) {
+void MoveTetrisLeftRight(int8_t dir) {
   while (moveTetrisLeftRightDelay >= maxMoveTetrisLeftRightDelay) {
     moveTetrisLeftRightDelay -= maxMoveTetrisLeftRightDelay;
     if (tetris_mode == 1) {
       bool canMove = true;
 
-      for (int i = 0; i < 4; i++) {
-        int figureBlockPos = GetFigureBlockPos(i);
+      for (int8_t i = 0; i < 4; i++) {
+        uint8_t figureBlockPos = GetFigureBlockPos(i);
         if ((figureBlockPos % COLUMNS) + dir < 0 || (figureBlockPos % COLUMNS) + dir >= tetris_game_width || snakeSgt[figureBlockPos + dir][0] != 0) {  //check if figure is outside game area or figure is inside another figure
           canMove = false;
           break;
@@ -1285,13 +1288,13 @@ void MoveTetrisLeftRight(int dir) {
   moveTetrisLeftRightDelay += calcMillis;
 }
 
-void CheckWholeLines(int minHeight, int maxHeight) {
-  int iterations = minHeight - maxHeight + 1;
-  int actHeight = minHeight;
+void CheckWholeLines(int8_t minHeight, int8_t maxHeight) {
+  uint8_t iterations = minHeight - maxHeight + 1;
+  uint8_t actHeight = minHeight;
 
-  for (int i = 0; i < iterations; i++) {
+  for (uint8_t i = 0; i < iterations; i++) {
     bool scorePoints = true;
-    for (int j = 0; j < tetris_game_width; j++) {
+    for (uint8_t j = 0; j < tetris_game_width; j++) {
       if (snakeSgt[actHeight * COLUMNS + j][0] == 0) {
         scorePoints = false;
         actHeight--;
@@ -1300,8 +1303,8 @@ void CheckWholeLines(int minHeight, int maxHeight) {
     }
 
     if (scorePoints) {
-      for (int k = actHeight - 1; k >= 0; k--) {
-        for (int l = 0; l < tetris_game_width; l++) {
+      for (int8_t k = actHeight - 1; k >= 0; k--) {
+        for (uint8_t l = 0; l < tetris_game_width; l++) {
           snakeSgt[(k + 1) * COLUMNS + l][0] = snakeSgt[k * COLUMNS + l][0];
           ColorSingle((k + 1) * COLUMNS + l, colors[snakeSgt[k * COLUMNS + l][0]], 20);
         }
@@ -1346,8 +1349,8 @@ void TetrisGame() {
       start_block_delay--;
 
     if (block_delay <= 0 && tetris_mode == 1) {
-      for (int i = 0; i < 4; i++) {
-        int figureBlockPos = GetFigureBlockPos(i);
+      for (int8_t i = 0; i < 4; i++) {
+        uint8_t figureBlockPos = GetFigureBlockPos(i);
         if (figureBlockPos + COLUMNS > DIODE_COUNT || snakeSgt[figureBlockPos + COLUMNS][0] != 0) {  //check if figure is outside game area or figure is inside another figure when getting down
           randomizeFigure = true;
           break;
@@ -1362,11 +1365,11 @@ void TetrisGame() {
         else
           block_delay = actual_movement_block_delay;
       } else {  //if figure can't move then save info about colors in array and check full lines for scoring
-        int minHeight = 0;
-        int maxHeight = 0;
+        uint8_t minHeight = 0;
+        uint8_t maxHeight = 0;
 
-        for (int i = 0; i < 4; i++) {
-          int figureBlockPos = (figurePosY + (figures[actualFigure][figureRot][i] / 4)) * COLUMNS + figurePosX + (figures[actualFigure][figureRot][i] % 4);
+        for (uint8_t i = 0; i < 4; i++) {
+          uint8_t figureBlockPos = (figurePosY + (figures[actualFigure][figureRot][i] / 4)) * COLUMNS + figurePosX + (figures[actualFigure][figureRot][i] % 4);
           snakeSgt[figureBlockPos][0] = actualFigureColor;
 
           if (i == 0)
@@ -1392,19 +1395,19 @@ void DrawWave()
     {
       uint16_t* waveData = getCalculatedFFT();
 
-      int divideValue = 32; //Add changing that divde value to adjust to sorounding world (or calc max, or something :P)
+      int8_t divideValue = 32; //Add changing that divde value to adjust to sorounding world (or calc max, or something :P)
 
-      for(int i = 0; i < FFT_COLUMNS; i++)
+      for(int8_t i = 0; i < FFT_COLUMNS; i++)
       {
         waveData[i] = (float)((float)waveData[i] / divideValue) * ROWS;
         if(waveData[i] >= ROWS)
           waveData[i] = ROWS - 1;
 
-        for(int j = ROWS - 1; j > waveData[i]; j--)
+        for(int8_t j = ROWS - 1; j > waveData[i]; j--)
           ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[0], 100);
 
-        for(int j = 0; j <= waveData[i]; j++)
-          ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[5], (int)((float)(j) / waveData[i] * 100));
+        for(int8_t j = 0; j <= waveData[i]; j++)
+          ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[5], (uint8_t)((float)(j) / waveData[i] * 100));
       }
     }
   }
@@ -1438,8 +1441,65 @@ void loop() {
   calcMillis = millis() - lastMillis;
   lastMillis = millis();
 
-  if (isMainOpt && mainOption == GLITCH_ID) {
-    DrawGlitchSigns();
+  //buttons for click
+  if (bitRead(flags_holdClick, BTN_LEFT)) {
+    if (buttonCount[BTN_LEFT] < BUTTON_DEBOUNCE_MAX) buttonCount[BTN_LEFT]++;
+    if (buttonCount[BTN_LEFT] == BUTTON_DEBOUNCE_ON) {
+      buttonCount[BTN_LEFT]++;
+      bitSet(flags_oneClick, BTN_LEFT);
+    }
+  } else {
+    if (buttonCount[BTN_LEFT] > 0) buttonCount[BTN_LEFT]--;
+  }
+
+  if (bitRead(flags_holdClick, BTN_UP)) {
+    if (buttonCount[BTN_UP] < BUTTON_DEBOUNCE_MAX) buttonCount[BTN_UP]++;
+    if (buttonCount[BTN_UP] == BUTTON_DEBOUNCE_ON) {
+      buttonCount[BTN_UP]++;
+      bitSet(flags_oneClick, BTN_UP);
+    }
+  } else {
+    if (buttonCount[BTN_UP] > 0) buttonCount[BTN_UP]--;
+  }
+
+  if (bitRead(flags_holdClick, BTN_RIGHT)) {
+    if (buttonCount[BTN_RIGHT] < BUTTON_DEBOUNCE_MAX) buttonCount[BTN_RIGHT]++;
+    if (buttonCount[BTN_RIGHT] == BUTTON_DEBOUNCE_ON) {
+      buttonCount[BTN_RIGHT]++;
+      bitSet(flags_oneClick, BTN_RIGHT);
+    }
+  } else {
+    if (buttonCount[BTN_RIGHT] > 0) buttonCount[BTN_RIGHT]--;
+  }
+
+  if (bitRead(flags_holdClick, BTN_DOWN)) {
+    if (buttonCount[BTN_DOWN] < BUTTON_DEBOUNCE_MAX) buttonCount[BTN_DOWN]++;
+    if (buttonCount[BTN_DOWN] == BUTTON_DEBOUNCE_ON) {
+      buttonCount[BTN_DOWN]++;
+      bitSet(flags_oneClick, BTN_DOWN);
+    }
+  } else {
+    if (buttonCount[BTN_DOWN] > 0) buttonCount[BTN_DOWN]--;
+  }
+
+  if (bitRead(flags_holdClick, BTN_1)) {
+    if (buttonCount[BTN_1] < BUTTON_DEBOUNCE_MAX) buttonCount[BTN_1]++;
+        if (buttonCount[BTN_1] == BUTTON_DEBOUNCE_ON) {
+      buttonCount[BTN_1]++;
+      bitSet(flags_oneClick, BTN_1);
+    }
+  } else {
+    if (buttonCount[BTN_1] > 0) buttonCount[BTN_1]--;
+  }
+
+  if (bitRead(flags_holdClick, BTN_2)) {
+    if (buttonCount[BTN_2] < BUTTON_DEBOUNCE_MAX) buttonCount[BTN_2]++;
+    if (buttonCount[BTN_2] == BUTTON_DEBOUNCE_ON) {
+      buttonCount[BTN_2]++;
+      bitSet(flags_oneClick, BTN_2);
+    }
+  } else {
+    if (buttonCount[BTN_2] > 0) buttonCount[BTN_2]--;
   }
 
   if (bitRead(flags_oneClick, BTN_LEFT)) {  //left
@@ -1654,9 +1714,11 @@ void loop() {
   }
 
   if (refresh && isMainOpt) {
+    refresh = false;
+    if (mainOption == GLITCH_ID) DrawGlitchSigns();
     pixels.clear();
     ColorHEX(menuSprites[mainOption], colors[mainOption + 1], 30, colors[0], 2);
-    refresh = false;
+    
   }
 
   if (!isMainOpt) {
@@ -1705,7 +1767,7 @@ void loop() {
   }
 
   if (glitchActive) { //reset screen after glitch
-    for (int i = 0; i < DIODE_COUNT; i++) {
+    for (uint8_t i = 0; i < DIODE_COUNT; i++) {
       pixels.setPixelColor(i, glitchBuffer[i]);
     }
   }
@@ -1714,45 +1776,6 @@ void loop() {
 ISR(PCINT2_vect) {
   switches = PINK;  // get PORTK value
   refresh = true;
-  unsigned long currentMillis = millis();
-
-  //buttons for click
-  if (!bitRead(switches, BTN_LEFT) && ((lastIntMillis[BTN_LEFT] + DEBOUNCE_TIME) < currentMillis))  //left
-  {
-    bitSet(flags_oneClick, BTN_LEFT);
-    lastIntMillis[BTN_LEFT] = currentMillis;
-  }
-
-  if (!bitRead(switches, BTN_UP) && ((lastIntMillis[BTN_UP] + DEBOUNCE_TIME) < currentMillis))  //up
-  {
-    bitSet(flags_oneClick, BTN_UP);
-    lastIntMillis[BTN_UP] = currentMillis;
-  }
-
-  if (!bitRead(switches, BTN_RIGHT) && ((lastIntMillis[BTN_RIGHT] + DEBOUNCE_TIME) < currentMillis))  //right
-  {
-    bitSet(flags_oneClick, BTN_RIGHT);
-    lastIntMillis[BTN_RIGHT] = currentMillis;
-  }
-
-  if (!bitRead(switches, BTN_DOWN) && ((lastIntMillis[BTN_DOWN] + DEBOUNCE_TIME) < currentMillis))  //down
-  {
-    bitSet(flags_oneClick, BTN_DOWN);
-    lastIntMillis[BTN_DOWN] = currentMillis;
-  }
-
-  if (!bitRead(switches, BTN_1) && ((lastIntMillis[BTN_1] + DEBOUNCE_TIME) < currentMillis))  //btn1
-  {
-    bitSet(flags_oneClick, BTN_1);
-    lastIntMillis[BTN_1] = currentMillis;
-  }
-
-  if (!bitRead(switches, BTN_2) && ((lastIntMillis[BTN_2] + DEBOUNCE_TIME) < currentMillis))  //btn2
-  {
-    bitSet(flags_oneClick, BTN_2);
-    lastIntMillis[BTN_2] = currentMillis;
-  }
-
 
   //buttons for hold
   if (!bitRead(switches, BTN_LEFT))  //left
