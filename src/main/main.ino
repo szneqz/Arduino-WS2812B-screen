@@ -1708,7 +1708,7 @@ void loop() {
     }
   }
 
-  if (bitRead(flags_holdClick, BTN_2) && bitRead(flags_holdClick, BTN_LEFT) && bitRead(flags_holdClick, BTN_RIGHT)) {  //btn1, btn2 and btn_up holded all together quit any application
+  if (bitRead(flags_holdClick, BTN_2) && bitRead(flags_holdClick, BTN_LEFT) && bitRead(flags_holdClick, BTN_RIGHT)) {  //btn1, btn2 and btn_up held all together quit any application
     if (!isMainOpt && (mainOption >= MIN_OPTION && mainOption <= MAX_OPTION))
       isMainOpt = true;
   }
