@@ -67,8 +67,6 @@ const unsigned long maxTetrisGameDelay = 30;
 unsigned long tetrisGameDelay = 0;
 const unsigned long maxMoveTetrisLeftRightDelay = 50;
 unsigned long moveTetrisLeftRightDelay = 0;
-const unsigned long maxDrawGlitchSignsDelay = 20;
-unsigned long drawGlitchSignsDelay = 0;
 unsigned long maxGlitchGlobalDelay = 500;
 unsigned long glitchGlobalDelay = 0;
 unsigned long maxGlitchGlobalDelayMinValue = 1250;
@@ -452,7 +450,7 @@ int tetris_score = 0;
 //
 
 //SOundWaves values
-double lastVolume = 0;
+uint16_t lastVolume = 0;
 
 //MainMenu values
 int mainOption = 0;     //MainMenu option
@@ -623,9 +621,6 @@ void StaticSprite() {
 }
 
 void DrawGlitchSigns() {
-  while (drawGlitchSignsDelay >= maxDrawGlitchSignsDelay) {
-    drawGlitchSignsDelay -= maxDrawGlitchSignsDelay;
-
     int8_t *miniSprite;
 
     if (glitchActive)
@@ -633,15 +628,11 @@ void DrawGlitchSigns() {
     else
       miniSprite = (int8_t *)miniNope;
 
-    for (int8_t i = 0; i < 4; i++) {
-      for (int8_t j = 0; j < 4; j++) {
+    for (uint8_t i = 0; i < 4; i++) {
+      for (uint8_t j = 0; j < 4; j++) {
         ColorSingle((ROWS - 5) * COLUMNS + i * COLUMNS + j, colors[*(miniSprite + i * 4 + j)], 100);
       }
     }
-  }
-
-  drawGlitchSignsDelay += calcMillis;
-
 }
 
 void GlitchEverything(int8_t addColorValue) {
@@ -659,18 +650,18 @@ void GlitchEverything(int8_t addColorValue) {
   glitchGlobalDelay += calcMillis;
 
     if (glitchTimes < maxGlitchTimes) {
-    while (glitchDrawFrameDelay >= maxGlitchDrawFrameDelay) {
-      glitchDrawFrameDelay -= maxGlitchDrawFrameDelay;
-      movGlitchX = random(-2, 3);
-      movGlitchY = random(-2, 3);
+      while (glitchDrawFrameDelay >= maxGlitchDrawFrameDelay) {
+        glitchDrawFrameDelay -= maxGlitchDrawFrameDelay;
+        movGlitchX = random(-2, 3);
+        movGlitchY = random(-2, 3);
 
-      isDrawed = false; //force to draw frame of glitch
-      
-      glitchTimes++;
+        isDrawed = false; //force to draw frame of glitch
+        
+        glitchTimes++;
+      }
+
+      glitchDrawFrameDelay += calcMillis;
     }
-
-    glitchDrawFrameDelay += calcMillis;
-  }
 
   if (!isDrawed) {
     for (uint8_t i = 0; i < DIODE_COUNT; i++) {
@@ -691,18 +682,18 @@ void GlitchEverything(int8_t addColorValue) {
 
         if ((i / COLUMNS) % 2 == 0) {
           if (pos1 - 1 > 0 && pos1 - 1 < DIODE_COUNT - 1 && red > 0)
-            pixels.setPixelColor(pos1 - 1, red * 0.5f, 0, 0);
+            pixels.setPixelColor(pos1 - 1, red>>1, 0, 0);
           if (pos1 > 0 && pos1 < DIODE_COUNT - 1 && green > 0)
-            pixels.setPixelColor(pos1, 0, green * 0.5f, 0);
+            pixels.setPixelColor(pos1, 0, green>>1, 0);
           if (pos1 + 1 > 0 && pos1 + 1 < DIODE_COUNT - 1 && blue > 0)
-            pixels.setPixelColor(pos1 + 1, 0, 0, blue * 0.5f);
+            pixels.setPixelColor(pos1 + 1, 0, 0, blue>>1);
         } else {
           if (pos2 + 1 > 0 && pos2 + 1 < DIODE_COUNT - 1 && red > 0)
-            pixels.setPixelColor(pos2 + 1, red * 0.5f, 0, 0);
+            pixels.setPixelColor(pos2 + 1, red>>1, 0, 0);
           if (pos2 > 0 && pos2 < DIODE_COUNT - 1 && green > 0)
-            pixels.setPixelColor(pos2, 0, green * 0.5f, 0);
+            pixels.setPixelColor(pos2, 0, green>>1, 0);
           if (pos2 - 1 > 0 && pos2 - 1 < DIODE_COUNT - 1 & blue > 0)
-            pixels.setPixelColor(pos2 - 1, 0, 0, blue * 0.5f);
+            pixels.setPixelColor(pos2 - 1, 0, 0, blue>>1);
         }
       }
     }
@@ -1399,7 +1390,7 @@ void DrawWave()
 
       for(int8_t i = 0; i < FFT_COLUMNS; i++)
       {
-        waveData[i] = (float)((float)waveData[i] / divideValue) * ROWS;
+        waveData[i] = (waveData[i] * ROWS) / divideValue;
         if(waveData[i] >= ROWS)
           waveData[i] = ROWS - 1;
 
@@ -1407,7 +1398,7 @@ void DrawWave()
           ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[0], 100);
 
         for(int8_t j = 0; j <= waveData[i]; j++)
-          ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[5], (uint8_t)((float)(j) / waveData[i] * 100));
+          ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[5], (uint8_t)((uint16_t)(j * 100) / waveData[i] ));
       }
     }
   }
@@ -1648,7 +1639,6 @@ void loop() {
         ResetTetris();
 
       if (mainOption == GLITCH_ID) {
-        drawGlitchSignsDelay = maxDrawGlitchSignsDelay;
         glitchGlobalDelay = maxGlitchGlobalDelay;
         glitchActive = !glitchActive;
         isMainOpt = true;  //don't go outside mainMenu
@@ -1765,7 +1755,7 @@ void loop() {
     isDrawed = true;
   }
 
-  if (glitchActive) { //reset screen after glitch
+  if (glitchActive && isDrawed) { //reset screen after glitch
     for (uint8_t i = 0; i < DIODE_COUNT; i++) {
       pixels.setPixelColor(i, glitchBuffer[i]);
     }
