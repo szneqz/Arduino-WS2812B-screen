@@ -46,7 +46,7 @@ byte *buffer;
 uint8_t data[N];
 uint16_t finalData[FFT_COLUMNS];
 uint16_t volumeCalc;
-double volumeResult;
+uint16_t volumeResult;
 
 byte FFTpin;
 
@@ -83,7 +83,7 @@ bool calculateFFT() {
       uint8_t min = 255;
       uint8_t max = 0;
 
-      volumeResult = (double)volumeCalc / N;
+      volumeResult = volumeCalc / N;
       volumeCalc = 0;
 
       for(int i = 0; i < N; i++)
@@ -144,7 +144,7 @@ uint16_t* getCalculatedFFT()
   return finalData;
 }
 
-double getVolume()
+uint16_t getVolume()
 {
   return volumeResult;
 }
