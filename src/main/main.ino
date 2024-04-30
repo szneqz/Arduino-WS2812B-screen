@@ -67,8 +67,6 @@ const unsigned long maxTetrisGameDelay = 30;
 unsigned long tetrisGameDelay = 0;
 const unsigned long maxMoveTetrisLeftRightDelay = 50;
 unsigned long moveTetrisLeftRightDelay = 0;
-const unsigned long maxDrawGlitchSignsDelay = 20;
-unsigned long drawGlitchSignsDelay = 0;
 unsigned long maxGlitchGlobalDelay = 500;
 unsigned long glitchGlobalDelay = 0;
 unsigned long maxGlitchGlobalDelayMinValue = 1250;
@@ -1641,7 +1639,6 @@ void loop() {
         ResetTetris();
 
       if (mainOption == GLITCH_ID) {
-        //drawGlitchSignsDelay = maxDrawGlitchSignsDelay;
         glitchGlobalDelay = maxGlitchGlobalDelay;
         glitchActive = !glitchActive;
         isMainOpt = true;  //don't go outside mainMenu
