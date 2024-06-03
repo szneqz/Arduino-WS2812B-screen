@@ -43,6 +43,9 @@
 //DrawLines
 #define LINES_AMOUNT 10
 
+//const values
+const float expValues[] = {0.0f, 0.0000047f, 0.000177f, 0.000244140625f, 0.00137f, 0.0129f, 0.015625f, 0.0427f, 0.0878f, 0.177978515625f, 0.263f, 0.635f, 1.0f};
+
 //global millis
 unsigned long lastMillis = 0;
 unsigned long calcMillis = 0;
@@ -1397,8 +1400,12 @@ void DrawWave()
         for(int8_t j = ROWS - 1; j > waveData[i]; j--)
           ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[0], 100);
 
-        for(int8_t j = 0; j <= waveData[i]; j++)
-          ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[5], (uint8_t)((uint16_t)(j * 100) / waveData[i] ));
+        for(int8_t j = 0; j <= waveData[i]; j++) {
+          uint8_t tmpColor[3];
+          HSVtoRGB((float)((millis() + i * 8) % 512) / 512, 1.0f - (expValues[min(j, ROWS)] / 1.0f), 1, tmpColor);
+          
+          ColorSingle((ROWS - j) * COLUMNS + (i + 1), tmpColor, (uint8_t)((uint16_t)(j * 50) / waveData[i] ));
+        }
       }
     }
   }
