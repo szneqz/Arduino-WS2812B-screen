@@ -8,6 +8,9 @@
 #define MAX_OPTION 6
 #define MIN_OPTION 0
 
+#define MAX_WAVETYPE 1
+#define MIN_WAVETYPE 0
+
 #define BUTTON_DEBOUNCE_MAX (10)
 #define BUTTON_DEBOUNCE_ON (7)
 #define BUTTON_DEBOUNCE_OFF (3)
@@ -452,8 +455,12 @@ int8_t start_block_delay = movement_block_delay;
 int tetris_score = 0;
 //
 
-//SOundWaves values
+//SoundWaves values
 uint16_t lastVolume = 0;
+uint8_t waveType = 0;
+uint8_t waveColors[3] = {256, 384, 1};
+bool waveColorsDir = false;
+//
 
 //MainMenu values
 int mainOption = 0;     //MainMenu option
@@ -1402,9 +1409,16 @@ void DrawWave()
 
         for(int8_t j = 0; j <= waveData[i]; j++) {
           uint8_t tmpColor[3];
-          HSVtoRGB((float)((millis() + i * 8) % 512) / 512, 1.0f - (expValues[min(j, ROWS)] / 1.0f), 1, tmpColor);
-          
-          ColorSingle((ROWS - j) * COLUMNS + (i + 1), tmpColor, (uint8_t)((uint16_t)(j * 50) / waveData[i] ));
+          if(waveType == 0) {
+            HSVtoRGB((float)((millis() + i * 8) % 512) / 512, 1.0f - (expValues[min(j, ROWS)] / 1.0f), 1, tmpColor);
+          }
+
+          if(waveType == 1) {
+            HSVtoRGB((float)((millis() + i * waveColors[2]) % (waveColors[1] - waveColors[0]) + waveColors[0]) / 512.0f, 1.0f - (expValues[min(j, ROWS)] / 1.0f), 1, tmpColor);
+            //add color getting back and not cutting + getting from bigger value to lower value
+          }
+
+          ColorSingle((ROWS - j) * COLUMNS + (i + 1), tmpColor, (uint8_t)((uint16_t)(j * 50) / waveData[i]));
         }
       }
     }
@@ -1515,6 +1529,7 @@ void loop() {
           snake_mode = 1;
       }
     }
+    
     bitClear(flags_oneClick, BTN_LEFT);
   }
 
@@ -1555,7 +1570,15 @@ void loop() {
         if (snake_mode == 0)
           snake_mode = 1;
       }
+
+      if (mainOption == WAVE_ID) {
+        if(waveType >= MAX_WAVETYPE)
+          waveType = MIN_WAVETYPE;
+        else
+          waveType++;
+      }
     }
+
     bitClear(flags_oneClick, BTN_UP);
   }
   if (bitRead(flags_oneClick, BTN_RIGHT)) {  //right
@@ -1566,6 +1589,7 @@ void loop() {
         if (option > 4)
           option = 0;
       }
+
       if (mainOption == SNAKE_ID) {  //SnakeGame
         if (snake_dir != 2 && last_snake_dir != 2 && snake_mode == 1)
           snake_dir = 0;
@@ -1573,6 +1597,7 @@ void loop() {
           snake_mode = 1;
       }
     }
+    
     bitClear(flags_oneClick, BTN_RIGHT);
   }
 
@@ -1606,13 +1631,22 @@ void loop() {
         if (staticSpriteNr >= MAX_SPRITE_NR)
           staticSpriteNr = 0;
       }
+
       if (mainOption == SNAKE_ID) {  //SnakeGame
         if (snake_dir != 3 && last_snake_dir != 3 && snake_mode == 1)
           snake_dir = 1;
         if (snake_mode == 0)
           snake_mode = 1;
       }
+
+      if (mainOption == WAVE_ID) {
+        if(waveType <= 0)
+          waveType = MAX_WAVETYPE;
+        else
+          waveType--;
+      }
     }
+
     bitClear(flags_oneClick, BTN_DOWN);
   }
 
@@ -1655,6 +1689,7 @@ void loop() {
         RotateTetrisFigure(-1);
       }
     }
+
     bitClear(flags_oneClick, BTN_1);
   }
 
@@ -1686,6 +1721,7 @@ void loop() {
         RotateTetrisFigure(1);
       }
     }
+    
     bitClear(flags_oneClick, BTN_2);
   }
 
