@@ -458,7 +458,7 @@ int tetris_score = 0;
 //SoundWaves values
 uint16_t lastVolume = 0;
 uint8_t waveType = 0;
-uint8_t waveColors[3] = {256, 384, 1};
+uint8_t waveColors[3] = {256, 384, 25};
 bool waveColorsDir = false;
 //
 
@@ -1396,7 +1396,7 @@ void DrawWave()
     {
       uint16_t* waveData = getCalculatedFFT();
 
-      int8_t divideValue = 32; //Add changing that divde value to adjust to sorounding world (or calc max, or something :P)
+      int8_t divideValue = 32;
 
       for(int8_t i = 0; i < FFT_COLUMNS; i++)
       {
@@ -1410,12 +1410,19 @@ void DrawWave()
         for(int8_t j = 0; j <= waveData[i]; j++) {
           uint8_t tmpColor[3];
           if(waveType == 0) {
-            HSVtoRGB((float)((millis() + i * 8) % 512) / 512, 1.0f - (expValues[min(j, ROWS)] / 1.0f), 1, tmpColor);
+            HSVtoRGB((float)(((millis() + i * 16) / 5) % 512) / 512, 1.0f - (expValues[min(j, ROWS)] / 1.0f), 1, tmpColor);
           }
 
           if(waveType == 1) {
-            HSVtoRGB((float)((millis() + i * waveColors[2]) % (waveColors[1] - waveColors[0]) + waveColors[0]) / 512.0f, 1.0f - (expValues[min(j, ROWS)] / 1.0f), 1, tmpColor);
-            //add color getting back and not cutting + getting from bigger value to lower value
+            uint8_t maxHalf = max(waveColors[0], waveColors[1]);
+            uint8_t minHalf = min(waveColors[0], waveColors[1]);
+            uint8_t difference = abs(waveColors[1] - waveColors[0]);
+            float finalColor = (float)((int)(((float)millis() + i * (float)waveColors[2]) / 10.0f) % (2 * difference) + minHalf);
+            if(finalColor > maxHalf)
+            {
+              finalColor = maxHalf - (finalColor - maxHalf);
+            }
+            HSVtoRGB(finalColor / 512.0f, 1.0f - (expValues[min(j, ROWS)] / 1.0f), 1, tmpColor);
           }
 
           ColorSingle((ROWS - j) * COLUMNS + (i + 1), tmpColor, (uint8_t)((uint16_t)(j * 50) / waveData[i]));
