@@ -10,6 +10,8 @@
 
 #define MAX_WAVETYPE 1
 #define MIN_WAVETYPE 0
+#define MAX_WAVECOLOR 5
+#define MIN_WAVECOLOR 0
 
 #define BUTTON_DEBOUNCE_MAX (10)
 #define BUTTON_DEBOUNCE_ON (7)
@@ -458,8 +460,11 @@ int tetris_score = 0;
 //SoundWaves values
 uint16_t lastVolume = 0;
 uint8_t waveType = 0;
-uint8_t waveColors[3] = {256, 384, 25};
-bool waveColorsDir = false;
+uint8_t waveColor = 0;
+uint8_t waveColors[][3] = {{0, 511, 25}, {0, 128, 25}, {340, 427, 5}, {200, 400, 50}, {85, 270, 50}, {0, 20, 25}};
+uint8_t waveList[COLUMNS];
+uint8_t actual_wave_delay = 0;
+const uint8_t wave_delay = 75;
 //
 
 //MainMenu values
@@ -1386,54 +1391,90 @@ void TetrisGame() {
   tetrisGameDelay += calcMillis;
 }
 
+void CalculateWaveColor(uint8_t* color, int i = 0, int j = ROWS) {
+  uint8_t maxHalf = max(waveColors[waveColor][0], waveColors[waveColor][1]);
+  uint8_t minHalf = min(waveColors[waveColor][0], waveColors[waveColor][1]);
+  uint8_t difference = abs(waveColors[waveColor][1] - waveColors[waveColor][0]);
+  float finalColor = (float)((int)(((float)millis() + i * (float)waveColors[waveColor][2]) / 10.0f) % (2 * difference) + minHalf);
+  if(finalColor > maxHalf)
+  {
+    finalColor = maxHalf - (finalColor - maxHalf);
+  }
+  HSVtoRGB(finalColor / 512.0f, 1.0f - (expValues[min(j, ROWS)] / 1.0f), 1, color);
+}
+
+void DrawSimpleWave(uint8_t* color) {
+  uint8_t max = 120;
+  
+  for(int i = 0; i < COLUMNS; i++) {
+    uint16_t height = waveList[i] > 255 ? 255 : waveList[i];
+    height = height * ROWS / max;
+    height = height > ROWS ? ROWS : height;
+    
+    ColorSingle(height * COLUMNS + (COLUMNS - i - 1), color, 100);
+  }  
+}
+
 void DrawWave()
 {
-  if(calculateFFT())
-  {
-    //Removing static soundWaves when everything is silent
-    lastVolume = (lastVolume + getVolume() * 39) / 40;
-    if(lastVolume > 1)
+  if(waveType == 0) {
+    if(calculateFFT())
     {
-      uint16_t* waveData = getCalculatedFFT();
-
-      int8_t divideValue = 32;
-
-      for(int8_t i = 0; i < FFT_COLUMNS; i++)
+      //Removing static soundWaves when everything is silent
+      lastVolume = (lastVolume + getVolume() * 39) / 40;
+      if(lastVolume > 1)
       {
-        waveData[i] = (waveData[i] * ROWS) / divideValue;
-        if(waveData[i] >= ROWS)
-          waveData[i] = ROWS - 1;
+        uint16_t* waveData = getCalculatedFFT();
 
-        for(int8_t j = ROWS - 1; j > waveData[i]; j--)
-          ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[0], 100);
+        int8_t divideValue = 32;
 
-        for(int8_t j = 0; j <= waveData[i]; j++) {
-          uint8_t tmpColor[3];
-          if(waveType == 0) {
-            HSVtoRGB((float)(((millis() + i * 16) / 5) % 512) / 512, 1.0f - (expValues[min(j, ROWS)] / 1.0f), 1, tmpColor);
+        for(int8_t i = 0; i < FFT_COLUMNS; i++)
+        {
+          waveData[i] = (waveData[i] * ROWS) / divideValue;
+          if(waveData[i] >= ROWS)
+            waveData[i] = ROWS - 1;
+
+          for(int8_t j = ROWS - 1; j > waveData[i]; j--)
+            ColorSingle((ROWS - j) * COLUMNS + (i + 1), colors[0], 100);
+
+          for(int8_t j = 0; j <= waveData[i]; j++) {
+            uint8_t tmpColor[3];
+            CalculateWaveColor(tmpColor, i, j);
+
+            ColorSingle((ROWS - j) * COLUMNS + (i + 1), tmpColor, (uint8_t)((uint16_t)(j * 50) / waveData[i]));
           }
-
-          if(waveType == 1) {
-            uint8_t maxHalf = max(waveColors[0], waveColors[1]);
-            uint8_t minHalf = min(waveColors[0], waveColors[1]);
-            uint8_t difference = abs(waveColors[1] - waveColors[0]);
-            float finalColor = (float)((int)(((float)millis() + i * (float)waveColors[2]) / 10.0f) % (2 * difference) + minHalf);
-            if(finalColor > maxHalf)
-            {
-              finalColor = maxHalf - (finalColor - maxHalf);
-            }
-            HSVtoRGB(finalColor / 512.0f, 1.0f - (expValues[min(j, ROWS)] / 1.0f), 1, tmpColor);
-          }
-
-          ColorSingle((ROWS - j) * COLUMNS + (i + 1), tmpColor, (uint8_t)((uint16_t)(j * 50) / waveData[i]));
         }
       }
     }
+  }
+
+  if(waveType == 1) {
+    uint8_t tmpColor[3];
+    uint16_t min = 640;
+
+    CalculateWaveColor(tmpColor);
+
+    DrawSimpleWave(colors[0]);
+
+    uint16_t waveValue = analogRead(A0) - min;
+
+    for(int i = COLUMNS - 1; i > 0; i--) {
+      waveList[i] = waveList[i - 1];
+    }
+
+    waveList[0] = waveValue;
+
+    DrawSimpleWave(tmpColor);
   }
 }
 
 void setup() {
   FFT_setup(A0);
+  
+  for(int i = 0; i < COLUMNS; i++)
+  {
+    waveList[i] = 0;
+  }
 
   pixels.begin();  //pixels library init
 
@@ -1535,6 +1576,13 @@ void loop() {
         if (snake_mode == 0)
           snake_mode = 1;
       }
+
+      if (mainOption == WAVE_ID) {
+        if(waveColor <= MIN_WAVECOLOR)
+          waveColor = MAX_WAVECOLOR;
+        else
+          waveColor--;
+      }
     }
     
     bitClear(flags_oneClick, BTN_LEFT);
@@ -1583,6 +1631,10 @@ void loop() {
           waveType = MIN_WAVETYPE;
         else
           waveType++;
+
+        refresh = true;  //reset sprite setting
+        isDrawed = false;
+        pixels.clear();
       }
     }
 
@@ -1602,6 +1654,13 @@ void loop() {
           snake_dir = 0;
         if (snake_mode == 0)
           snake_mode = 1;
+      }
+
+      if (mainOption == WAVE_ID) {
+        if(waveColor >= MAX_WAVECOLOR)
+          waveColor = MIN_WAVECOLOR;
+        else
+          waveColor++;
       }
     }
     
@@ -1651,6 +1710,10 @@ void loop() {
           waveType = MAX_WAVETYPE;
         else
           waveType--;
+
+        refresh = true;  //reset sprite setting
+        isDrawed = false;
+        pixels.clear();
       }
     }
 
