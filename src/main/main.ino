@@ -1426,7 +1426,7 @@ void DrawWave()
       {
         uint16_t* waveData = getCalculatedFFT();
 
-        int8_t divideValue = 32;
+        uint16_t divideValue = 32;
 
         for(int8_t i = 0; i < FFT_COLUMNS; i++)
         {
@@ -1441,7 +1441,10 @@ void DrawWave()
             uint8_t tmpColor[3];
             CalculateWaveColor(tmpColor, i, j);
 
-            ColorSingle((ROWS - j) * COLUMNS + (i + 1), tmpColor, (uint8_t)((uint16_t)(j * 50) / waveData[i]));
+            int8_t position = constrain((ROWS - j) * COLUMNS + (i + 1), 1, DIODE_COUNT);
+            int8_t saturation = constrain((uint16_t)(j * 50) / waveData[i], 0, 100);
+
+            ColorSingle(position, tmpColor, saturation);
           }
         }
       }
