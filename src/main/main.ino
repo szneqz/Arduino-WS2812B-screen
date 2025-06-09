@@ -461,7 +461,7 @@ int tetris_score = 0;
 uint16_t lastVolume = 0;
 uint8_t waveType = 0;
 uint8_t waveColor = 0;
-uint8_t waveColors[][3] = {{0, 511, 25}, {0, 128, 25}, {340, 427, 5}, {200, 400, 50}, {85, 270, 50}, {0, 20, 25}};
+uint16_t waveColors[][3] = {{0, 511, 25}, {0, 128, 25}, {340, 427, 5}, {200, 400, 50}, {85, 270, 50}, {0, 20, 25}};
 uint8_t waveList[COLUMNS];
 uint8_t actual_wave_delay = 0;
 const uint8_t wave_delay = 75;
@@ -1392,14 +1392,16 @@ void TetrisGame() {
 }
 
 void CalculateWaveColor(uint8_t* color, int i = 0, int j = ROWS) {
-  uint8_t maxHalf = max(waveColors[waveColor][0], waveColors[waveColor][1]);
-  uint8_t minHalf = min(waveColors[waveColor][0], waveColors[waveColor][1]);
-  uint8_t difference = abs(waveColors[waveColor][1] - waveColors[waveColor][0]);
-  float finalColor = (float)((int)(((float)millis() + i * (float)waveColors[waveColor][2]) / 10.0f) % (2 * difference) + minHalf);
-  if(finalColor > maxHalf)
+  uint16_t maxHalf = max(waveColors[waveColor][0], waveColors[waveColor][1]);
+  uint16_t minHalf = min(waveColors[waveColor][0], waveColors[waveColor][1]);
+  uint16_t difference = abs(waveColors[waveColor][1] - waveColors[waveColor][0]);
+  float finalColor = (float)((uint16_t)(((float)millis() + i * (float)waveColors[waveColor][2]) / 10.0f) % (2 * difference));
+  if(finalColor > difference)
   {
-    finalColor = maxHalf - (finalColor - maxHalf);
+    finalColor = difference - (finalColor - difference);
   }
+  finalColor += minHalf;
+  finalColor = constrain(finalColor, 0.0f, 512.0f);
   HSVtoRGB(finalColor / 512.0f, 1.0f - (expValues[min(j, ROWS)] / 1.0f), 1, color);
 }
 
@@ -1442,7 +1444,7 @@ void DrawWave()
             CalculateWaveColor(tmpColor, i, j);
 
             int8_t position = constrain((ROWS - j) * COLUMNS + (i + 1), 1, DIODE_COUNT);
-            int8_t saturation = constrain((uint16_t)(j * 50) / waveData[i], 0, 100);
+            int8_t saturation = constrain((uint16_t)(j * 30) / waveData[i], 0, 100);
 
             ColorSingle(position, tmpColor, saturation);
           }
