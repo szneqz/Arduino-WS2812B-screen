@@ -49,6 +49,10 @@
 //DrawLines
 #define LINES_AMOUNT 10
 
+//Arrows
+#define ARROWS_COUNT 8
+#define ARROWS_TICK_WAIT 10
+
 //const values
 const float expValues[] = {0.0f, 0.0000047f, 0.000177f, 0.000244140625f, 0.00137f, 0.0129f, 0.015625f, 0.0427f, 0.0878f, 0.177978515625f, 0.263f, 0.635f, 1.0f};
 
@@ -76,6 +80,8 @@ const unsigned long maxTetrisGameDelay = 30;
 unsigned long tetrisGameDelay = 0;
 const unsigned long maxMoveTetrisLeftRightDelay = 50;
 unsigned long moveTetrisLeftRightDelay = 0;
+const unsigned long maxArrowsGameDelay = 30;
+unsigned long arrowsGameDelay = 0;
 unsigned long maxGlitchGlobalDelay = 500;
 unsigned long glitchGlobalDelay = 0;
 unsigned long maxGlitchGlobalDelayMinValue = 1250;
@@ -298,9 +304,9 @@ byte menuSprites[][30] = {
     0b00100111, 0b00100001, 0b00000000, 0b10001100, 0b11000111, 0b00000011, 0b00000000, 0b01000000, 0b00000000, 0b10001100,
     0b00000001, 0b01100000, 0b00000100, 0b00100000, 0b00000000, 0b10000000, 0b00110000, 0b00000000, 0b01100011, 0b00000000 },
 
-  { 0b00000000, 0b00000000, 0b00000000, 0b00010000, 0b00000000, 0b11110000, 0b00000000, 0b00000000, 0b00000001, 0b00000000, 
-    0b01000000, 0b00111100, 0b10000000, 0b10000111, 0b00000111, 0b00000100, 0b00000000, 0b00000000, 0b00000000, 0b00100000, 
-    0b00000000, 0b11001000, 0b00000001, 0b00100000, 0b00000010, 0b11000000, 0b00001001, 0b00000000, 0b00000010, 0b00000000 },
+  { 0b00000000, 0b00000010, 0b00000000, 0b00011000, 0b00000000, 0b11100000, 0b00001000, 0b10000000, 0b00110001, 0b00000000, 
+    0b11100010, 0b00111100, 0b00000000, 0b10000011, 0b00000111, 0b00001000, 0b11000000, 0b00000111, 0b00000000, 0b10001110, 
+    0b00000000, 0b00010000, 0b00000111, 0b00000000, 0b00111110, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000 },
 
   { 0b11100000, 0b00001000, 0b01000000, 0b00100000, 0b00000010, 0b10001101, 0b00000000, 0b00100100, 0b01000110, 0b11100000, 
     0b00000000, 0b00000001, 0b00000000, 0b11110100, 0b00000111, 0b00000000, 0b00000000, 0b10010000, 0b00000000, 0b11011000, 
@@ -331,7 +337,20 @@ byte staticSprites[][30] = {
   { 0b01000000, 0b00000000, 0b00010001, 0b10011100, 0b00000000, 0b11111001, 0b00000000, 0b01110000, 0b10000111, 0b11000000,
     0b01011000, 0b01001000, 0b01100000, 0b00000000, 0b11000000, 0b00000000, 0b11000000, 0b01001011, 0b00010000, 0b00000011,
     0b00000000, 0b00000000, 0b01000000, 0b00110100, 0b00000001, 0b11000000, 0b00000000, 0b00100000, 0b10000000, 0b00000000 }
+};
 
+byte arrowEndMessages[][30] = {
+  { 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b10000000, 0b01110111, 0b01110010, 0b01000010, 
+    0b00101010, 0b00111000, 0b10100111, 0b00100000, 0b10000100, 0b10000010, 0b00010000, 0b00001010, 0b01011110, 0b11001000, 
+    0b00000001, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000 },
+
+  { 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b01010011, 0b01010010, 0b01010010, 
+    0b01010101, 0b01001001, 0b01010011, 0b00100101, 0b11001101, 0b10001001, 0b01010100, 0b00100101, 0b01001100, 0b10010101, 
+    0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000 },
+
+  { 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b11000111, 0b00011100, 0b10100100, 
+    0b10010100, 0b01110000, 0b01010010, 0b01000010, 0b01111010, 0b00001001, 0b00101001, 0b00100101, 0b10011100, 0b01110100, 
+    0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000 }
 };
 
 //spirte values
@@ -461,6 +480,45 @@ int8_t block_delay = movement_block_delay;
 int8_t start_block_delay = movement_block_delay;
 int tetris_score = 0;
 //
+
+//ArrowsGame values
+const uint8_t arrowShapes[4][9] =
+{
+  {2, 6, 7, 10, 11, 12, 16, 17, 22}, //LEFT
+  {5, 6, 7, 8, 9, 11, 12, 13, 17}, //DOWN
+  {7, 11, 12, 13, 15, 16, 17, 18, 19}, //UP
+  {2, 7, 8, 12, 13, 14, 17, 18, 22}  //RIGHT
+};
+const uint8_t arrowsStaticPositions[4][2] = 
+{
+  {0, 8},
+  {4, 8},
+  {9, 8},
+  {13, 8}
+};
+uint8_t arrowColors[4][3] = {{0, 0, 255}, {0, 0, 255}, {0, 0, 255}, {0, 0, 255}};
+const uint8_t arrowStatusColors[4] = {1, 5, 4, 3}; //Idle, Miss, Almost, Hit
+const uint8_t fallingArrowsColor = 14;
+uint8_t clickedArrowStatus[4] = {1, 1, 1, 1};
+uint8_t clickedArrow[4] = {ARROWS_TICK_WAIT, ARROWS_TICK_WAIT, ARROWS_TICK_WAIT, ARROWS_TICK_WAIT}; //0L, 1D, 2U, 3R
+uint8_t nextArrowPosition = 0;
+bool arrowsMove[ARROWS_COUNT];
+uint8_t arrowsTypesMoving[ARROWS_COUNT];
+int8_t arrowsPositions[ARROWS_COUNT][2]; 
+uint8_t arrowSpeedWait = 5;
+const uint8_t maxArrowSpeedWait = 6;
+uint8_t arrowSpeedWaitCount = 0;
+uint8_t const waitToSpawn = 30;
+uint8_t waitToSpawnCount = 0;
+int8_t arrowMode = 0;   //-1 end, 0 static, 1 playing
+const int8_t missScore = -2;
+const int8_t tooSlowScore = -1;
+const int8_t almostScore = 1;
+const int8_t hitScore = 2;
+uint8_t arrowScore = 0;
+const uint8_t maxSpeedScore = 50;
+const unsigned long maxArrowGameTime = 30000;
+unsigned long arrowGameStart = 0;
 
 //SoundWaves values
 uint16_t lastVolume = 0;
@@ -1154,6 +1212,33 @@ void ResetTetris() {
   moveTetrisLeftRightDelay = maxMoveTetrisLeftRightDelay;
 }
 
+void ResetArrows() {
+  arrowScore = 0;
+  arrowMode = 0;
+
+  for(int i = 0; i < 4; i++)
+  {
+    clickedArrow[i] = 0;
+    clickedArrowStatus[i] = arrowStatusColors[0];
+  }
+
+  nextArrowPosition = random(0, 4);
+
+  for(int i = 0; i < ARROWS_COUNT; i++)
+  {
+    arrowsMove[i] = false;
+    arrowsTypesMoving[i] = 0;
+    arrowsPositions[i][0] = 0;
+    arrowsPositions[i][1] = -5;
+  }
+
+  arrowSpeedWait = maxArrowSpeedWait;
+  arrowSpeedWaitCount = 1;
+  waitToSpawnCount = 1;
+  arrowsGameDelay = maxArrowsGameDelay;
+  arrowGameStart = millis();
+}
+
 uint8_t GetFigureBlockPos(uint8_t i, int8_t myFigPosX = -10, int8_t myFigPosY = -10, int8_t myFigRot = -1, int8_t thisFigure = -1) {
   if (myFigPosX == -10) myFigPosX = figurePosX;
   if (myFigPosY == -10) myFigPosY = figurePosY;
@@ -1331,7 +1416,6 @@ void CheckWholeLines(int8_t minHeight, int8_t maxHeight) {
 }
 
 void TetrisGame() {
-  Serial.println("Tetris: " + String(tetrisGameDelay));
   while (tetrisGameDelay >= maxTetrisGameDelay) {
     tetrisGameDelay -= maxTetrisGameDelay;
 
@@ -1394,6 +1478,222 @@ void TetrisGame() {
   }
 
   tetrisGameDelay += calcMillis;
+}
+
+int16_t GetArrowPos(uint8_t i, int8_t x, int8_t y, uint8_t arrow) {
+  int16_t returnX = x + (arrowShapes[arrow][i] % 5);
+  if (returnX >= COLUMNS || returnX < 0)
+    return -1;
+
+  int16_t returnY = y + (arrowShapes[arrow][i] / 5);
+  if (returnY >= ROWS || returnY < 0)
+    return -1;
+
+  return returnY * COLUMNS + returnX;
+}
+
+void MixArrowColors(float mixValue, uint8_t* color1, uint8_t* color2, uint8_t i)
+{
+  arrowColors[i][0] = color1[0] * mixValue + color2[0] * (1.0f - mixValue);
+  arrowColors[i][1] = color1[1] * mixValue + color2[1] * (1.0f - mixValue);
+  arrowColors[i][2] = color1[2] * mixValue + color2[2] * (1.0f - mixValue);
+}
+
+void TryToSpawnArrows()
+{
+  waitToSpawnCount--;
+
+  if(waitToSpawnCount <= 0)
+  {
+    waitToSpawnCount = waitToSpawn;
+    for(int i = 0; i < ARROWS_COUNT; i++)
+    {
+      if(!arrowsMove[i])
+      {
+        arrowsTypesMoving[i] = random(0, 4);
+        arrowsPositions[i][0] = arrowsStaticPositions[arrowsTypesMoving[i]][0];
+        arrowsPositions[i][1] = -5;
+        arrowsMove[i] = true;
+        break;
+      }
+    }
+  }
+}
+
+void MoveArrows()
+{
+  if(arrowSpeedWaitCount <= 0)
+  {
+    for(int i = 0; i < ARROWS_COUNT; i++)
+    {
+      for(int j = 0; j < 9; j++)
+      {
+        int16_t pos = GetArrowPos(j, arrowsPositions[i][0], arrowsPositions[i][1], arrowsTypesMoving[i]);
+        if (pos > -1)
+          ColorSingle(pos, colors[0], 100);
+      }
+
+      if(arrowsMove[i])
+      {
+        arrowsPositions[i][1]++;
+
+        if(arrowsPositions[i][1] > ROWS)
+        {
+          arrowsMove[i] = false;
+          arrowsTypesMoving[i] = 0;
+          arrowsPositions[i][0] = 0;
+          arrowsPositions[i][1] = -5;
+          ChangeScore(tooSlowScore);
+          continue;
+        }
+
+        for(int j = 0; j < 9; j++)
+        {
+          int16_t pos = GetArrowPos(j, arrowsPositions[i][0], arrowsPositions[i][1], arrowsTypesMoving[i]);
+          if (pos > -1)
+            ColorSingle(pos, colors[fallingArrowsColor], 50);
+        }
+      }
+    }
+
+    arrowSpeedWaitCount = arrowSpeedWait;
+  }
+
+  arrowSpeedWaitCount--;
+}
+
+void DrawArrowsScore()
+{
+  for(int i = 0; i < COLUMNS; i++)
+  {
+    if (arrowScore > 2 * COLUMNS + i)
+      ColorSingle(i, colors[3], 50);
+    else if (arrowScore > COLUMNS + i)
+      ColorSingle(i, colors[3], 50);
+    else if (arrowScore > i)
+      ColorSingle(i, colors[4], 50);
+    else
+      ColorSingle(i, colors[5], 50);
+  }
+}
+
+void DrawClickArrows()
+{
+  for(int i = 0; i < 4; i++)
+  {
+    uint8_t* arrowColor = colors[1];
+
+    if(clickedArrow[i] > 0)
+    {
+      uint8_t* mixColor1 = colors[clickedArrowStatus[i]];
+      MixArrowColors((float)clickedArrow[i] / ARROWS_TICK_WAIT, mixColor1, colors[1], i);
+      arrowColor = arrowColors[i];
+    }
+
+    for(int j = 0; j < 9; j++)
+    {
+      int16_t pos = GetArrowPos(j, arrowsStaticPositions[i][0], arrowsStaticPositions[i][1], i);
+      if (pos > -1)
+        ColorSingle(pos, arrowColor, 100);
+    }
+
+    if(clickedArrow[i] > 0)
+    {
+      clickedArrow[i] -= 1;
+    }
+  }
+}
+
+void CheckArrowScoring(uint8_t arrow)
+{
+  clickedArrowStatus[arrow] = arrowStatusColors[1]; //MISS
+  for(int i = 0; i < ARROWS_COUNT; i++)
+  {
+    if (arrowsMove[i] && arrowsPositions[i][0] == arrowsStaticPositions[arrow][0] && abs(arrowsPositions[i][1] - arrowsStaticPositions[arrow][1]) <= 1)
+    {
+      clickedArrowStatus[arrow] = arrowStatusColors[2]; //ALMOST
+      if (arrowsPositions[i][1] == arrowsStaticPositions[arrow][1])
+      {
+        clickedArrowStatus[arrow] = arrowStatusColors[3]; //HIT
+      }
+
+      for(int j = 0; j < 9; j++)
+      {
+        int16_t pos = GetArrowPos(j, arrowsPositions[i][0], arrowsPositions[i][1], arrowsTypesMoving[i]);
+        if (pos > -1)
+          ColorSingle(pos, colors[0], 100);
+      }
+
+      arrowsMove[i] = false;
+      arrowsPositions[i][0] = 0;
+      arrowsPositions[i][1] = -5;
+    }
+  }
+
+  if (clickedArrowStatus[arrow] == arrowStatusColors[1])
+  {
+    ChangeScore(missScore);
+  }
+  else if (clickedArrowStatus[arrow] == arrowStatusColors[2])
+  {
+    ChangeScore(almostScore);
+  }
+  else if (clickedArrowStatus[arrow] == arrowStatusColors[3])
+  {
+    ChangeScore(hitScore);
+  }
+}
+
+void ChangeScore(int8_t value)
+{
+  if (arrowScore + value < 0)
+    arrowScore = 0;
+  else
+    arrowScore += value;
+
+  float speedFactor = constrain((float)arrowScore / maxSpeedScore, 0.0f, 1.0f);
+  arrowSpeedWait = (1.0f - speedFactor) * (maxArrowSpeedWait * 0.75f) + (maxArrowSpeedWait * 0.25f);
+}
+
+void DrawArrowEnd()
+{
+  if (arrowScore > 40)
+    ColorHEX(arrowEndMessages[0], colors[3], 100, colors[0], 100);
+  else if (arrowScore > 20)
+    ColorHEX(arrowEndMessages[1], colors[4], 100, colors[0], 100);
+  else
+    ColorHEX(arrowEndMessages[2], colors[5], 100, colors[0], 100);
+}
+
+void ArrowsGame() {
+  while (arrowsGameDelay >= maxArrowsGameDelay) {
+    arrowsGameDelay -= maxArrowsGameDelay;
+
+    if (arrowMode == 1)
+    {
+      TryToSpawnArrows();
+      MoveArrows();
+    }
+    else
+    {
+      for(int i = 0; i < 4; i++)
+      {
+        if(clickedArrow[i] > 0)
+          clickedArrow[i] -= 1;
+      }
+    }
+
+    DrawClickArrows();
+    DrawArrowsScore();
+
+    if(millis() > arrowGameStart + maxArrowGameTime)
+    {
+      arrowMode = -1;
+      DrawArrowEnd();
+    }
+  }
+
+  arrowsGameDelay += calcMillis;
 }
 
 void CalculateWaveColor(uint8_t* color, int i = 0, int j = ROWS) {
@@ -1587,6 +1887,20 @@ void loop() {
           snake_mode = 1;
       }
 
+      if (mainOption == ARROWS_ID) {
+        if (arrowMode != -1)
+        {
+          clickedArrow[0] = ARROWS_TICK_WAIT;
+        }
+        if (arrowMode == 0)
+        {
+          arrowMode = 1;
+          arrowGameStart = millis();
+        }
+        if (arrowMode == 1)
+          CheckArrowScoring(0);
+      }
+
       if (mainOption == WAVE_ID) {
         if(waveColor <= MIN_WAVECOLOR)
           waveColor = MAX_WAVECOLOR;
@@ -1636,6 +1950,20 @@ void loop() {
           snake_mode = 1;
       }
 
+      if (mainOption == ARROWS_ID) {
+        if (arrowMode != -1)
+        {
+          clickedArrow[2] = ARROWS_TICK_WAIT;
+        }
+        if (arrowMode == 0)
+        {
+          arrowMode = 1;
+          arrowGameStart = millis();
+        }
+        if (arrowMode == 1)
+          CheckArrowScoring(2);
+      }
+
       if (mainOption == WAVE_ID) {
         if(waveType >= MAX_WAVETYPE)
           waveType = MIN_WAVETYPE;
@@ -1664,6 +1992,20 @@ void loop() {
           snake_dir = 0;
         if (snake_mode == 0)
           snake_mode = 1;
+      }
+
+      if (mainOption == ARROWS_ID) {
+        if (arrowMode != -1)
+        {
+          clickedArrow[3] = ARROWS_TICK_WAIT;
+        }
+        if (arrowMode == 0)
+        {
+          arrowMode = 1;
+          arrowGameStart = millis();
+        }
+        if (arrowMode == 1)
+          CheckArrowScoring(3);
       }
 
       if (mainOption == WAVE_ID) {
@@ -1715,6 +2057,20 @@ void loop() {
           snake_mode = 1;
       }
 
+      if (mainOption == ARROWS_ID) {
+        if (arrowMode != -1)
+        {
+          clickedArrow[1] = ARROWS_TICK_WAIT;
+        }
+        if (arrowMode == 0)
+        {
+          arrowMode = 1;
+          arrowGameStart = millis();
+        }
+        if (arrowMode == 1)
+          CheckArrowScoring(1);
+      }
+
       if (mainOption == WAVE_ID) {
         if(waveType <= 0)
           waveType = MAX_WAVETYPE;
@@ -1758,6 +2114,9 @@ void loop() {
 
       if (mainOption == TETRIS_ID)
         ResetTetris();
+
+      if (mainOption == ARROWS_ID)
+        ResetArrows();
 
       if (mainOption == GLITCH_ID) {
         glitchGlobalDelay = maxGlitchGlobalDelay;
@@ -1864,6 +2223,9 @@ void loop() {
 
     if (mainOption == TETRIS_ID)
       TetrisGame();
+
+    if (mainOption == ARROWS_ID)
+      ArrowsGame();
 
     if (mainOption == WAVE_ID)
       DrawWave();
