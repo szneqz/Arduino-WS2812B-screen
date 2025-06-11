@@ -1669,27 +1669,30 @@ void ArrowsGame() {
   while (arrowsGameDelay >= maxArrowsGameDelay) {
     arrowsGameDelay -= maxArrowsGameDelay;
 
-    if (arrowMode == 1)
+    if (arrowMode != -1)
     {
-      TryToSpawnArrows();
-      MoveArrows();
-    }
-    else
-    {
-      for(int i = 0; i < 4; i++)
+      if (arrowMode == 1)
       {
-        if(clickedArrow[i] > 0)
-          clickedArrow[i] -= 1;
+        TryToSpawnArrows();
+        MoveArrows();
+        if(millis() > arrowGameStart + maxArrowGameTime)
+        {
+          arrowMode = -1;
+          DrawArrowEnd();
+          break;
+        }
       }
-    }
+      else
+      {
+        for(int i = 0; i < 4; i++)
+        {
+          if(clickedArrow[i] > 0)
+            clickedArrow[i] -= 1;
+        }
+      }
 
-    DrawClickArrows();
-    DrawArrowsScore();
-
-    if(millis() > arrowGameStart + maxArrowGameTime)
-    {
-      arrowMode = -1;
-      DrawArrowEnd();
+      DrawClickArrows();
+      DrawArrowsScore();
     }
   }
 
@@ -1888,17 +1891,17 @@ void loop() {
       }
 
       if (mainOption == ARROWS_ID) {
-        if (arrowMode != -1)
+        if (arrowMode != -1 && clickedArrow[0] == 0)
         {
           clickedArrow[0] = ARROWS_TICK_WAIT;
+          if (arrowMode == 1)
+            CheckArrowScoring(0);
         }
         if (arrowMode == 0)
         {
           arrowMode = 1;
           arrowGameStart = millis();
         }
-        if (arrowMode == 1)
-          CheckArrowScoring(0);
       }
 
       if (mainOption == WAVE_ID) {
@@ -1951,17 +1954,17 @@ void loop() {
       }
 
       if (mainOption == ARROWS_ID) {
-        if (arrowMode != -1)
+        if (arrowMode != -1 && clickedArrow[2] == 0)
         {
           clickedArrow[2] = ARROWS_TICK_WAIT;
+          if (arrowMode == 1)
+            CheckArrowScoring(2);
         }
         if (arrowMode == 0)
         {
           arrowMode = 1;
           arrowGameStart = millis();
         }
-        if (arrowMode == 1)
-          CheckArrowScoring(2);
       }
 
       if (mainOption == WAVE_ID) {
@@ -1995,17 +1998,17 @@ void loop() {
       }
 
       if (mainOption == ARROWS_ID) {
-        if (arrowMode != -1)
+        if (arrowMode != -1 && clickedArrow[3] == 0)
         {
           clickedArrow[3] = ARROWS_TICK_WAIT;
+          if (arrowMode == 1)
+            CheckArrowScoring(3);
         }
         if (arrowMode == 0)
         {
           arrowMode = 1;
           arrowGameStart = millis();
         }
-        if (arrowMode == 1)
-          CheckArrowScoring(3);
       }
 
       if (mainOption == WAVE_ID) {
@@ -2058,17 +2061,17 @@ void loop() {
       }
 
       if (mainOption == ARROWS_ID) {
-        if (arrowMode != -1)
+        if (arrowMode != -1 && clickedArrow[1] == 0)
         {
           clickedArrow[1] = ARROWS_TICK_WAIT;
+          if (arrowMode == 1)
+            CheckArrowScoring(1);
         }
         if (arrowMode == 0)
         {
           arrowMode = 1;
           arrowGameStart = millis();
         }
-        if (arrowMode == 1)
-          CheckArrowScoring(1);
       }
 
       if (mainOption == WAVE_ID) {
