@@ -1551,7 +1551,7 @@ void MoveArrows()
         {
           int16_t pos = GetArrowPos(j, arrowsPositions[i][0], arrowsPositions[i][1], arrowsTypesMoving[i]);
           if (pos > -1)
-            ColorSingle(pos, colors[fallingArrowsColor], 50);
+            ColorSingle(pos, colors[fallingArrowsColor], 30);
         }
       }
     }
@@ -1594,7 +1594,7 @@ void DrawClickArrows()
     {
       int16_t pos = GetArrowPos(j, arrowsStaticPositions[i][0], arrowsStaticPositions[i][1], i);
       if (pos > -1)
-        ColorSingle(pos, arrowColor, 100);
+        ColorSingle(pos, arrowColor, 30);
     }
 
     if(clickedArrow[i] > 0)
@@ -1621,7 +1621,7 @@ void CheckArrowScoring(uint8_t arrow)
       {
         int16_t pos = GetArrowPos(j, arrowsPositions[i][0], arrowsPositions[i][1], arrowsTypesMoving[i]);
         if (pos > -1)
-          ColorSingle(pos, colors[0], 100);
+          ColorSingle(pos, colors[0], 30);
       }
 
       arrowsMove[i] = false;
@@ -1658,11 +1658,11 @@ void ChangeScore(int8_t value)
 void DrawArrowEnd()
 {
   if (arrowScore > 40)
-    ColorHEX(arrowEndMessages[0], colors[3], 100, colors[0], 100);
+    ColorHEX(arrowEndMessages[0], colors[3], 100, colors[0], 80);
   else if (arrowScore > 20)
-    ColorHEX(arrowEndMessages[1], colors[4], 100, colors[0], 100);
+    ColorHEX(arrowEndMessages[1], colors[4], 100, colors[0], 80);
   else
-    ColorHEX(arrowEndMessages[2], colors[5], 100, colors[0], 100);
+    ColorHEX(arrowEndMessages[2], colors[5], 100, colors[0], 80);
 }
 
 void ArrowsGame() {
